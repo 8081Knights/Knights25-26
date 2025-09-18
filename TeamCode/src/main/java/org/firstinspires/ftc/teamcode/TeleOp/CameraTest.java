@@ -23,6 +23,8 @@ public class CameraTest extends OpMode {
     final int frameWidth = 1280;
     int cameraBuffer = frameWidth / 3;
 
+    String initData = "";
+
 
     VisionPortal.Builder vBuilder = new VisionPortal.Builder();
 
@@ -48,12 +50,25 @@ public class CameraTest extends OpMode {
         cameraServo = hardwareMap.get(CRServo.class, "servoExample");
 
         telemetry.addLine("Initialized. Press Play.");
+        detections = aprilTag.getDetections();
+        initData += aprilTag.getDetections().size();
+        for (AprilTagDetection det : detections) {
+            initData += "ID: " + det.id + " X: " + det.ftcPose.x;
+
+            telemetry.addData("ID", det.id);
+            telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
+            telemetry.addData("Pose X", det.ftcPose.x);
+            telemetry.addData("Pose Y", det.ftcPose.y);
+            telemetry.addData("Heading (deg)", det.ftcPose.yaw);
+            telemetry.update();
+        }
         telemetry.update();
 
     }
 
     @Override
     public void loop() {
+        telemetry.addData("initData", initData);
 
         detections = aprilTag.getDetections();
         for (AprilTagDetection det : detections) {
