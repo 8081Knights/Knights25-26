@@ -21,7 +21,7 @@ public class HardwareSoftware {
     public DcMotorEx FLdrive    = null;
   
 
-    public Servo ServoExample     = null;
+    //public Servo ServoExample     = null;
     
 
     public SparkFunOTOS gyro;
@@ -39,7 +39,7 @@ public class HardwareSoftware {
 
        
 
-        ServoExample = hw.get(Servo.class, "ServoExample");
+        //ServoExample = hw.get(Servo.class, "ServoExample");
        
 
         FLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -90,8 +90,8 @@ public class HardwareSoftware {
   
     public SparkFunOTOS gyro(){return gyro;}
 
-    public Servo ServoExample(){
-      return ServoExample;
-    }
+ //   public Servo ServoExample(){
+     // return ServoExample;
+    //}
 
 }

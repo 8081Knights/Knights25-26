@@ -48,7 +48,7 @@ public class CameraTest extends OpMode {
                 .build();
 
         cameraServo = hardwareMap.get(CRServo.class, "servoExample");
-
+   
         telemetry.addLine("Initialized. Press Play.");
         detections = aprilTag.getDetections();
         initData += aprilTag.getDetections().size();
