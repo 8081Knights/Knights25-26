@@ -25,6 +25,5 @@ public class ColorSensor extends OpMode {
         telemetry.addData("green", green);
         telemetry.addData("blue", blue);
         telemetry.update();
-
     }
 }
