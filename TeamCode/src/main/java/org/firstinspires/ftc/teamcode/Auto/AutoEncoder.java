@@ -204,7 +204,7 @@ public class AutoEncoder extends LinearOpMode {
                 telemetry.addLine("HELLLLLLLLLLOOOOOOO "+ String.format("%5.3f      %3d     (%3d,%3d)",
                         b.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
                 telemetry.update();
-
+//tyler is the best
 
                 if(!blobs.isEmpty()){
                     // Assuming you care about the largest blob
