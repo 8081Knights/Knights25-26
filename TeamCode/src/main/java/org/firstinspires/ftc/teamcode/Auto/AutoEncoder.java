@@ -101,8 +101,9 @@ public class AutoEncoder extends LinearOpMode {
 
     List<ColorBlobLocatorProcessor.Blob> blobs = null;
 
-    ColorBlobLocatorProcessor colorLocator = null;
+    ColorBlobLocatorProcessor colorLocatorPurple = null;
 
+    ColorBlobLocatorProcessor colorLocatorGreen = null;
 
 
     @Override
@@ -139,7 +140,7 @@ public class AutoEncoder extends LinearOpMode {
 
 
         //Visual code!!!
-        colorLocator = new ColorBlobLocatorProcessor.Builder()
+        colorLocatorPurple = new ColorBlobLocatorProcessor.Builder()
                 .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
                 .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
                 .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
@@ -155,8 +156,25 @@ public class AutoEncoder extends LinearOpMode {
 
                 .build();
 
+        colorLocatorGreen = new ColorBlobLocatorProcessor.Builder()
+                .setTargetColorRange(ColorRange.ARTIFACT_GREEN)   // Use a predefined color match
+                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+                .setDrawContours(true)   // Show contours on the Stream Preview
+                .setBoxFitColor(0)       // Disable the drawing of rectangles
+                .setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
+                .setBlurSize(5)          // Smooth the transitions between different colors in image
+
+                // the following options have been added to fill in perimeter holes.
+                .setDilateSize(15)       // Expand blobs to fill any divots on the edges
+                .setErodeSize(15)        // Shrink blobs back to original size
+                .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
+
+                .build();
+
         VisionPortal portal = new VisionPortal.Builder()
-                .addProcessor(colorLocator)
+                .addProcessor(colorLocatorPurple)
+                .addProcessor(colorLocatorGreen)
                 .setCameraResolution(new Size(320, 240))
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .build();
@@ -188,7 +206,7 @@ public class AutoEncoder extends LinearOpMode {
                 telemetry.update();
 
 
-                if (blobs.size() > 0) {
+                if(!blobs.isEmpty()){
                     // Assuming you care about the largest blob
                     ColorBlobLocatorProcessor.Blob largestBlob = blobs.get(0);
 
@@ -224,15 +242,21 @@ public class AutoEncoder extends LinearOpMode {
     }
 
     public void updateBlobs(){
-        blobs = colorLocator.getBlobs();
+            blobs = colorLocatorPurple.getBlobs();
 
-        ColorBlobLocatorProcessor.Util.filterByCriteria(
-                ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
-                50, 20000, blobs);  // filter out very small blobs.
 
-        ColorBlobLocatorProcessor.Util.filterByCriteria(
-                ColorBlobLocatorProcessor.BlobCriteria.BY_CIRCULARITY,
-                0.6, 1, blobs);
+            blobs.addAll(colorLocatorGreen.getBlobs());
+
+
+
+            ColorBlobLocatorProcessor.Util.filterByCriteria(
+                    ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
+                    50, 20000, blobs);  // filter out very small blobs.
+
+            ColorBlobLocatorProcessor.Util.filterByCriteria(
+                    ColorBlobLocatorProcessor.BlobCriteria.BY_CIRCULARITY,
+                    0.6, 1, blobs);
+
         if(!blobs.isEmpty()) {
             currentBlob = blobs.get(0);
         }
