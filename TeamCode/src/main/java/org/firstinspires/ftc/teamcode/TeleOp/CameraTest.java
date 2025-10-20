@@ -126,6 +126,7 @@ public class CameraTest extends OpMode {
                 cameraServo.setPower(num);
                 telemetry.addData("thingy", (num));
                 //}
+                goToTag();
             }
         } else {
             telemetry.addData("TAG OUT", "NONE");
