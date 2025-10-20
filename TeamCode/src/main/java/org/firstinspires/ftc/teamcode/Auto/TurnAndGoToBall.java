@@ -72,9 +72,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="AutoEncoder", group="Robot")
+@Autonomous(name="TurnAndGoToBall", group="Robot")
 
-public class AutoEncoder extends LinearOpMode {
+public class TurnAndGoToBall extends LinearOpMode {
 
     /* Declare OpMode members. */
     private DcMotor         LDrive   = null;
