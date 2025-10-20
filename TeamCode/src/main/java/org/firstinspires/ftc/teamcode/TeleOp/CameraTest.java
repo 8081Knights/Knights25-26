@@ -123,7 +123,7 @@ public class CameraTest extends OpMode {
                                     cameraServo.setPower(0);
                                 }*/
                 double num = -((tag.center.x - ((double) frameWidth / 2)) / ((double) frameWidth / 2) * 1.2);
-                cameraServo.setPower(num);
+                //cameraServo.setPower(num);
                 telemetry.addData("thingy", (num));
                 //}
                 goToTag();
