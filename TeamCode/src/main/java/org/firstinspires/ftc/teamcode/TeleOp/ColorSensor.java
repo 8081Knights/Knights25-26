@@ -8,7 +8,7 @@ public class ColorSensor extends OpMode {
 
     RevColorSensorV3 colorSensor;
     int red;
-    int greena;
+    int green;
     int blue;
 
     public void init() {
