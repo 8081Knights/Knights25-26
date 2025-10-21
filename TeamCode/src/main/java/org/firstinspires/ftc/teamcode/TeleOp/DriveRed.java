@@ -18,7 +18,7 @@ import java.util.List;
 
 @TeleOp(name="DriveRed")
 public class DriveRed extends OpMode {
-    HardwareSoftware hw = new HardwareSoftware();
+    HardwareSoftware robot = new HardwareSoftware();
 
     double[] initPositions = {0,0,0};
 
@@ -37,26 +37,26 @@ public class DriveRed extends OpMode {
     @Override
     public void init() {
 
-        hw.init(hardwareMap);
+        robot.init(hardwareMap);
 
-        hw.gyro().calibrateImu();
-        hw.gyro().resetTracking();
+        robot.gyro().calibrateImu();
+        robot.gyro().resetTracking();
 
-        hw.gyro.setLinearUnit(DistanceUnit.INCH);
-        hw.gyro.setAngularUnit(AngleUnit.RADIANS);
+        robot.gyro.setLinearUnit(DistanceUnit.INCH);
+        robot.gyro.setAngularUnit(AngleUnit.RADIANS);
         SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
-        hw.gyro.setOffset(offset);
-        hw.gyro.setLinearScalar(1.0);
-        hw.gyro.setAngularScalar(1.0);
-        hw.gyro.calibrateImu();
-        hw.gyro.resetTracking();
+        robot.gyro.setOffset(offset);
+        robot.gyro.setLinearScalar(1.0);
+        robot.gyro.setAngularScalar(1.0);
+        robot.gyro.calibrateImu();
+        robot.gyro.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
-        hw.gyro.setPosition(currentPosition);
+        robot.gyro.setPosition(currentPosition);
 
         //this is where you add all of the locations for the robot to go to
 
 
-        currentPose.init(hw,initPositions[0],initPositions[1],initPositions[2]);
+        currentPose.init(robot,initPositions[0],initPositions[1],initPositions[2]);
 
     }
 
@@ -69,7 +69,7 @@ public class DriveRed extends OpMode {
         double x = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
 
-        SparkFunOTOS.Pose2D pos = hw.gyro().getPosition();
+        SparkFunOTOS.Pose2D pos = robot.gyro().getPosition();
 
         double botHeading = -Math.toRadians(pos.h) + Math.PI;
 
@@ -85,10 +85,10 @@ public class DriveRed extends OpMode {
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
 
         if(!isMovingToSetPos){
-            hw.FLdrive.setPower(((rotY + rotX + rx) / denominator) * DS);
-            hw.BLdrive.setPower(((rotY - rotX + rx) / denominator) * DS);
-            hw.FRdrive.setPower(((rotY - rotX - rx) / denominator) * DS);
-            hw.BRdrive.setPower(((rotY + rotX - rx) / denominator) * DS);
+            robot.FLdrive.setPower(((rotY + rotX + rx) / denominator) * DS);
+            robot.BLdrive.setPower(((rotY - rotX + rx) / denominator) * DS);
+            robot.FRdrive.setPower(((rotY - rotX - rx) / denominator) * DS);
+            robot.BRdrive.setPower(((rotY + rotX - rx) / denominator) * DS);
         }
 
 
@@ -146,7 +146,7 @@ public class DriveRed extends OpMode {
 //            hw.Intake().setPower(-gamepad1.left_trigger);
 //        }
         if (gamepad1.share){
-            hw.gyro.resetTracking();
+            robot.gyro.resetTracking();
         }
 
 
@@ -159,7 +159,7 @@ public class DriveRed extends OpMode {
         double cerror;
 
         while (!isOkToMoveOn) {
-            pos = hw.gyro.getPosition();
+            pos = robot.gyro.getPosition();
             telemetry.addData("Posx", pos.x);
             telemetry.addData("Posy", pos.y);
             telemetry.addData("Posh", pos.h);
@@ -330,10 +330,10 @@ public class DriveRed extends OpMode {
 
             double denominator = Math.max(Math.abs(powY) + Math.abs(powX) + Math.abs(rx), 1);
 
-            hw.FLdrive.setPower((( -realSetY - realSetX - rx) / denominator) * setPose.speed);
-            hw.BLdrive.setPower((( -realSetY + realSetX - rx) / denominator) * setPose.speed);
-            hw.FRdrive.setPower((( -realSetY + realSetX + rx) / denominator) * setPose.speed);
-            hw.BRdrive.setPower((( -realSetY - realSetX + rx) / denominator) * setPose.speed);
+            robot.FLdrive.setPower((( -realSetY - realSetX - rx) / denominator) * setPose.speed);
+            robot.BLdrive.setPower((( -realSetY + realSetX - rx) / denominator) * setPose.speed);
+            robot.FRdrive.setPower((( -realSetY + realSetX + rx) / denominator) * setPose.speed);
+            robot.BRdrive.setPower((( -realSetY - realSetX + rx) / denominator) * setPose.speed);
             currentError = Math.abs(powdX) + Math.abs(powdY) + Math.abs(rx);
 
             return currentError;
