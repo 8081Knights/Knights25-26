@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
 
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -25,8 +28,8 @@ public class CameraTest extends OpMode {
     final int frameWidth = 1280;
     int cameraBuffer = frameWidth / 3;
 
-    private DcMotor         LDrive   = null;
-    private DcMotor         RDrive  = null;
+    //private DcMotor         LDrive   = null;
+    //private DcMotor         RDrive  = null;
     static final double     COUNTS_PER_INCH         = 33.3;
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -40,10 +43,28 @@ public class CameraTest extends OpMode {
 
     HardwareSoftware robot = new HardwareSoftware();
 
-    CRServo cameraServo;
+
+
+    //CRServo cameraServo;
     double range = 0;
 
     public void init() {
+
+        robot.init(hardwareMap);
+
+        robot.gyro().calibrateImu();
+        robot.gyro().resetTracking();
+
+        robot.gyro.setLinearUnit(DistanceUnit.INCH);
+        robot.gyro.setAngularUnit(AngleUnit.RADIANS);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+        robot.gyro.setOffset(offset);
+        robot.gyro.setLinearScalar(1.0);
+        robot.gyro.setAngularScalar(1.0);
+        robot.gyro.calibrateImu();
+        robot.gyro.resetTracking();
+        SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
+        robot.gyro.setPosition(currentPosition);
         // Create the AprilTag processor
         //tagProcessor = AprilTagProcessor.easyCreateWithDefaults();
         aprilTag = new AprilTagProcessor.Builder()
@@ -58,7 +79,7 @@ public class CameraTest extends OpMode {
                 .addProcessor(aprilTag)
                 .build();
 
-        cameraServo = hardwareMap.get(CRServo.class, "servoExample");
+        //cameraServo = hardwareMap.get(CRServo.class, "servoExample");
    
         telemetry.addLine("Initialized. Press Play.");
         detections = aprilTag.getDetections();
@@ -76,8 +97,8 @@ public class CameraTest extends OpMode {
             telemetry.update();
         }
 
-        LDrive  = hardwareMap.get(DcMotor.class, "Ldrive");
-        RDrive = hardwareMap.get(DcMotor.class, "Rdrive");
+        //LDrive  = hardwareMap.get(DcMotor.class, "Ldrive");
+        //RDrive = hardwareMap.get(DcMotor.class, "Rdrive");
 
 
         telemetry.update();
@@ -130,7 +151,7 @@ public class CameraTest extends OpMode {
             }
         } else {
             telemetry.addData("TAG OUT", "NONE");
-            cameraServo.setPower(0);
+            //cameraServo.setPower(0);
         }
 
         telemetry.update();
@@ -140,39 +161,53 @@ public class CameraTest extends OpMode {
     public void continuousEncoderDrive(double speed,
                                        double leftInches, double rightInches,
                                        double timeoutS) {
-        int newLeftTarget;
-        int newRightTarget;
+        int newLeftBackTarget;
+        int newRightBackTarget;
+        int newRightFrontTarget;
+        int newLeftFrontTarget;
+
 
         // Ensure that the OpMode is still active
 
             // Determine new target position, and pass to motor controller
-            newLeftTarget = LDrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
-            newRightTarget = RDrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
-            LDrive.setTargetPosition(newLeftTarget);
-            RDrive.setTargetPosition(newRightTarget);
+            newLeftBackTarget = robot.FLdrive.getCurrentPosition() + (int)(leftInches * COUNTS_PER_INCH);
+            newRightBackTarget = robot.BLdrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newLeftFrontTarget = robot.BLdrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            newRightFrontTarget = robot.BLdrive.getCurrentPosition() + (int)(rightInches * COUNTS_PER_INCH);
+            robot.BLdrive.setTargetPosition(newLeftBackTarget);
+            robot.BRdrive.setTargetPosition(newRightBackTarget);
+            robot.FLdrive.setTargetPosition(newLeftFrontTarget);
+            robot.FRdrive.setTargetPosition(newRightFrontTarget);
 
-            // Turn On RUN_TO_POSITION
-            LDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            RDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-            // reset the timeout time and start motion.
+        // Turn On RUN_TO_POSITION
+            robot.FLdrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.FRdrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.BRdrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.BLdrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+        // reset the timeout time and start motion.
             runtime.reset();
-            LDrive.setPower(Math.abs(speed));
-            RDrive.setPower(Math.abs(speed));
+            robot.FLdrive.setPower(Math.abs(speed));
+            robot.FRdrive.setPower(Math.abs(speed));
+            robot.BLdrive.setPower(Math.abs(speed));
+            robot.BRdrive.setPower(Math.abs(speed));
 
-            // keep looping while we are still active, and there is time left, and both motors are running.
+
+        // keep looping while we are still active, and there is time left, and both motors are running.
             // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
             // its target position, the motion will stop.  This is "safer" in the event that the robot will
             // always end the motion as soon as possible.
             // However, if you require that BOTH motors have finished their moves before the robot continues
             // onto the next step, use (isBusy() || isBusy()) in the loop test.
             while ((runtime.seconds() < timeoutS) &&
-                    (LDrive.isBusy() && RDrive.isBusy())) {
+                    (robot.FLdrive.isBusy() && robot.FRdrive.isBusy() && robot.BLdrive.isBusy() && robot.BRdrive.isBusy())) {
 
                 // Display it for the driver.
-                telemetry.addData("Running to",  " %7d :%7d", newLeftTarget,  newRightTarget);
-                telemetry.addData("Currently at",  " at %7d :%7d",
-                        LDrive.getCurrentPosition(), RDrive.getCurrentPosition());
+                telemetry.addData("Running to",  " %7d :%7d :%7d :%7d", newLeftBackTarget,  newRightBackTarget);
+                telemetry.addData("Currently at",  " at %7d :%7d :%7d :%7d",
+                        robot.FLdrive.getCurrentPosition(), robot.FRdrive.getCurrentPosition(), robot.BRdrive.getCurrentPosition(), robot.BLdrive.getCurrentPosition());
                 telemetry.update();
             }
 /*
