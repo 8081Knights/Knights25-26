@@ -85,10 +85,10 @@ public class DriveRed extends OpMode {
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
 
         if(!isMovingToSetPos){
-            hw.FLdrive().setPower(((rotY + rotX + rx) / denominator) * DS);
-            hw.BLdrive().setPower(((rotY - rotX + rx) / denominator) * DS);
-            hw.FRdrive().setPower(((rotY - rotX - rx) / denominator) * DS);
-            hw.BRdrive().setPower(((rotY + rotX - rx) / denominator) * DS);
+            hw.FLdrive.setPower(((rotY + rotX + rx) / denominator) * DS);
+            hw.BLdrive.setPower(((rotY - rotX + rx) / denominator) * DS);
+            hw.FRdrive.setPower(((rotY - rotX - rx) / denominator) * DS);
+            hw.BRdrive.setPower(((rotY + rotX - rx) / denominator) * DS);
         }
 
 
@@ -146,7 +146,7 @@ public class DriveRed extends OpMode {
 //            hw.Intake().setPower(-gamepad1.left_trigger);
 //        }
         if (gamepad1.share){
-            hw.gyro().resetTracking();
+            hw.gyro.resetTracking();
         }
 
 
