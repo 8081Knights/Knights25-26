@@ -105,7 +105,9 @@ public class DriveRed extends OpMode {
         if(gamepad1.y){
             SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
             currentPose.updateRealRobotPositions(pos);
-            telemetry.addData("Position", currentPose.realRobotX + " " + currentPose.realRobotY);
+            String formattedX = String.format("%.2f", currentPose.realRobotX);
+            String formattedY = String.format("%.2f", currentPose.realRobotY);
+            telemetry.addLine("Current Position  X: " + formattedX + "Y: " + formattedY);
         }
 
     }
