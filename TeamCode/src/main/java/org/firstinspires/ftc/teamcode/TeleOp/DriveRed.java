@@ -32,6 +32,14 @@ public class DriveRed extends OpMode {
 
     boolean isOkToMoveOn = false;
 
+    boolean autoJustStopped = false;
+
+    NewPositionOfRobot currentTarget = null;
+
+
+
+
+
 
 
     @Override
@@ -60,41 +68,27 @@ public class DriveRed extends OpMode {
 
     }
 
-    double DS = 1;
-
     @Override
     public void loop() {
-
-        double y = -gamepad1.left_stick_y;
-        double x = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x;
-
-        SparkFunOTOS.Pose2D pos = robot.gyro().getPosition();
-
-        double botHeading = -Math.toRadians(pos.h) + Math.PI;
-
-        // Rotate the movement direction counter to the bot's rotation
-        double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
-        double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
-        telemetry.addData("newX", rotX);
-        telemetry.addData("newY", rotY);
-        telemetry.addData("rx", rx);
-        rotX = rotX * 1.1;  // Counteract imperfect strafing
-
-
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        telemetry.clear();
 
         if(!isMovingToSetPos){
-            robot.FLdrive.setPower(((rotY + rotX + rx) / denominator) * DS);
-            robot.BLdrive.setPower(((rotY - rotX + rx) / denominator) * DS);
-            robot.FRdrive.setPower(((rotY - rotX - rx) / denominator) * DS);
-            robot.BRdrive.setPower(((rotY + rotX - rx) / denominator) * DS);
+            manualDrive();
+        } else {
+            updateAutoDrive();
+        }
+
+        if (gamepad1.x) {
+            stopAutoMove();
         }
 
 
+        //TODO: figure out where the launch zone is
         if(gamepad1.a){
-            driveToShootingPosFar(new NewPositionOfRobot(5,6,4));
+            startAutoMove(new NewPositionOfRobot(0, 40, 0));
         }
+
+
 
 //        if (gamepad1.b) {
 //            hw.Lucket().setPosition(.02);
@@ -149,42 +143,61 @@ public class DriveRed extends OpMode {
             robot.gyro.resetTracking();
         }
 
-
-
     }
 
-    public void driveToShootingPosFar(NewPositionOfRobot setPos){
+    public void manualDrive() {
+        double y = -gamepad1.left_stick_y;
+        double x = gamepad1.left_stick_x;
+        double rx = gamepad1.right_stick_x;
+
+        SparkFunOTOS.Pose2D pos = robot.gyro().getPosition();
+        double botHeading = -Math.toRadians(pos.h) + Math.PI;
+
+        double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
+        double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
+
+        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+        robot.FLdrive.setPower(((rotY + rotX + rx) / denominator));
+        robot.BLdrive.setPower(((rotY - rotX + rx) / denominator));
+        robot.FRdrive.setPower(((rotY - rotX - rx) / denominator));
+        robot.BRdrive.setPower(((rotY + rotX - rx) / denominator));
+    }
+
+
+    public void startAutoMove(NewPositionOfRobot target) {
         isMovingToSetPos = true;
-
-        double cerror;
-
-        while (!isOkToMoveOn) {
-            pos = robot.gyro.getPosition();
-            telemetry.addData("Posx", pos.x);
-            telemetry.addData("Posy", pos.y);
-            telemetry.addData("Posh", pos.h);
-            telemetry.update();
-
-            currentPose.gyX = pos.x;
-            currentPose.gyY = pos.y;
-            currentPose.gyR = pos.h;
-
-            currentPose.updateRealRobotPositions(pos);
-
-            cerror = currentPose.moveToSetPosition(setPos);
-
-            telemetry.addData("cerror", cerror);
-
-
-            if (Math.abs(cerror) < cTreshold) {
-                isOkToMoveOn = true;
-            }
-
-        }
-
-        isMovingToSetPos = false;
-        isOkToMoveOn = false;
+        currentTarget = target;
     }
+
+    public void updateAutoDrive() {
+        SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
+        currentPose.updateRealRobotPositions(pos);
+
+        double error = currentPose.moveToSetPosition(currentTarget);
+
+        telemetry.addData("AutoMoving", true);
+        telemetry.addData("Error", error);
+
+        if (Math.abs(error) < cTreshold) {
+            stopAutoMove();
+        }
+    }
+
+    public void stopAutoMove() {
+        isMovingToSetPos = false;
+        currentTarget = null;
+
+        robot.FLdrive.setPower(0);
+        robot.FRdrive.setPower(0);
+        robot.BLdrive.setPower(0);
+        robot.BRdrive.setPower(0);
+        telemetry.clear();
+        telemetry.addData("AutoMove: ", "Stopped");
+        telemetry.update();
+        autoJustStopped = true;
+    }
+
+
 
 
     /**
