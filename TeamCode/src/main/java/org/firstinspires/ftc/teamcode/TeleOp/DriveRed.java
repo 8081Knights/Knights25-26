@@ -3,15 +3,12 @@ package org.firstinspires.ftc.teamcode.TeleOp;
 import android.graphics.Color;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Auto.TylerAuto;
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -46,7 +43,7 @@ public class DriveRed extends OpMode {
 
     VisionPortal visionPortal;
     AprilTagProcessor aprilTag;
-    List<AprilTagDetection> detections;
+    ArrayList<AprilTagDetection> detections;
 
     ColorBlobLocatorProcessor colorLocatorPurple = null;
 
@@ -129,6 +126,18 @@ public class DriveRed extends OpMode {
     @Override
     public void loop() {
         telemetry.clear();
+        detections = aprilTag.getDetections();
+        if(!detections.isEmpty()) {
+            for (AprilTagDetection det : detections) {
+                telemetry.addData("ID", det.id);
+                telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
+                telemetry.addData("Pose X", det.ftcPose.x);
+                telemetry.addData("Pose Y", det.ftcPose.y);
+                telemetry.addData("Heading (deg)", det.ftcPose.yaw);
+                telemetry.addData("Range", det.ftcPose.range);
+                telemetry.update();
+            }
+        }
 
         if(!isMovingToSetPos){
             manualDrive();
