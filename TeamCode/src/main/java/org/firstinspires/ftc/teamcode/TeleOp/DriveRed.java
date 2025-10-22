@@ -82,63 +82,11 @@ public class DriveRed extends OpMode {
             stopAutoMove();
         }
 
-
         //TODO: figure out where the launch zone is
         if(gamepad1.a){
             startAutoMove(new NewPositionOfRobot(0, 40, 0));
         }
 
-
-
-//        if (gamepad1.b) {
-//            hw.Lucket().setPosition(.02);
-//            hw.Rucket().setPosition(.09);
-//        }
-//        else if (gamepad1.a) {
-//            hw.Lucket().setPosition(.64);
-//            hw.Rucket().setPosition(.72);
-//        }
-//
-//        if (gamepad1.dpad_up) {
-//            hw.Linear().setTargetPosition(3000);
-//            hw.Rinear().setTargetPosition(3000);
-//            hw.Linear().setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            hw.Rinear().setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            hw.Linear().setPower(1);
-//            hw.Rinear().setPower(1);
-//        }
-//        if (gamepad1.dpad_left) {
-//            hw.Linear().setTargetPosition(1500);
-//            hw.Rinear().setTargetPosition(1500);
-//            hw.Linear().setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            hw.Rinear().setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            hw.Linear().setPower(1);
-//            hw.Rinear().setPower(1);
-//        }
-//        if (gamepad1.dpad_down) {
-//            hw.Linear().setTargetPosition(25);
-//            hw.Rinear().setTargetPosition(25);
-//            hw.Linear().setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            hw.Rinear().setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            hw.Linear().setPower(1);
-//            hw.Rinear().setPower(1);
-//        }
-//        if (gamepad1.right_bumper){
-//            hw.InLinear().setPower(1);
-//        }
-//        else if (gamepad1.left_bumper){
-//            hw.InLinear().setPower(-1);
-//        }
-//        else{
-//            hw.InLinear().setPower(0);
-//        }
-//
-//        if (gamepad1.right_trigger > .1) {
-//            hw.Intake().setPower(gamepad1.right_trigger);
-//        }
-//        if (gamepad1.left_trigger > .1) {
-//            hw.Intake().setPower(-gamepad1.left_trigger);
-//        }
         if (gamepad1.share){
             robot.gyro.resetTracking();
         }
