@@ -11,6 +11,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Auto.TylerAuto;
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,11 +39,9 @@ public class DriveRed extends OpMode {
 
     NewPositionOfRobot currentTarget = null;
 
-
-
-
-
-
+    VisionPortal visionPortal;
+    AprilTagProcessor aprilTag;
+    List<AprilTagDetection> detections;
 
     @Override
     public void init() {
@@ -61,10 +62,18 @@ public class DriveRed extends OpMode {
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
         robot.gyro.setPosition(currentPosition);
 
+        aprilTag = new AprilTagProcessor.Builder()
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagOutline(true)
+                .build();
+
         //this is where you add all of the locations for the robot to go to
 
 
         currentPose.init(robot,initPositions[0],initPositions[1],initPositions[2]);
+
+
 
     }
 
@@ -83,12 +92,20 @@ public class DriveRed extends OpMode {
         }
 
         //TODO: figure out where the launch zone is
+        //either this should be based on the april tags, or just make sure that
+        // the gyro is reset in the same spot every time
         if(gamepad1.a){
             startAutoMove(new NewPositionOfRobot(0, 40, 0));
         }
 
-        if (gamepad1.share){
+        if (gamepad1.b){
             robot.gyro.resetTracking();
+        }
+
+        if(gamepad1.y){
+            SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
+            currentPose.updateRealRobotPositions(pos);
+            telemetry.addData("Position", currentPose.realRobotX + " " + currentPose.realRobotY);
         }
 
     }
