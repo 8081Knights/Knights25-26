@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.HardwareSoftware;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.opencv.Circle;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
@@ -45,10 +46,17 @@ public class DriveRed extends OpMode {
     AprilTagProcessor aprilTag;
     ArrayList<AprilTagDetection> detections;
 
+    Circle circleFit = null;
+
+    ColorBlobLocatorProcessor.Blob currentBlob = null;
+
+    List<ColorBlobLocatorProcessor.Blob> blobs = null;
+
     ColorBlobLocatorProcessor colorLocatorPurple = null;
 
     ColorBlobLocatorProcessor colorLocatorGreen = null;
 
+    double distanceFromBlob;
     @Override
     public void init() {
 
@@ -126,8 +134,10 @@ public class DriveRed extends OpMode {
     @Override
     public void loop() {
         telemetry.clear();
+        //current blob telemetry is commented out
+        handleBlobs();
         detections = aprilTag.getDetections();
-        if(!detections.isEmpty()) {
+        if (!detections.isEmpty() && gamepad1.right_bumper) {
             for (AprilTagDetection det : detections) {
                 telemetry.addData("ID", det.id);
                 telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
@@ -139,7 +149,8 @@ public class DriveRed extends OpMode {
             }
         }
 
-        if(!isMovingToSetPos){
+
+        if (!isMovingToSetPos) {
             manualDrive();
         } else {
             updateAutoDrive();
@@ -152,15 +163,15 @@ public class DriveRed extends OpMode {
         //TODO: figure out where the launch zone is
         //either this should be based on the april tags, or just make sure that
         // the gyro is reset in the same spot every time
-        if(gamepad1.a){
+        if (gamepad1.a) {
             startAutoMove(new NewPositionOfRobot(0, 40, 0));
         }
 
-        if (gamepad1.b){
+        if (gamepad1.b) {
             robot.gyro.resetTracking();
         }
 
-        if(gamepad1.y){
+        if (gamepad1.y) {
             SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
             currentPose.updateRealRobotPositions(pos);
             String formattedX = String.format("%.2f", currentPose.realRobotX);
@@ -169,6 +180,69 @@ public class DriveRed extends OpMode {
         }
 
     }
+
+    /**
+     * if you want to use color blobs,
+     * the fields from the currentBlob and circle fit,
+     * also the distance from blob variable too
+     */
+    public void handleBlobs(){
+        updateBlobs();
+
+        telemetry.addLine("Circularity Radius Center");
+
+        double ARTIFACT_REAL_WIDTH_CM = 12.7;
+        double FOCAL_LENGTH_IN_PIXELS = 424.4;
+
+        // Display the Blob's circularity, and the size (radius) and center location of its circleFit.
+        for (ColorBlobLocatorProcessor.Blob b : blobs) {
+            currentBlob = b;
+            circleFit = currentBlob.getCircle();
+            //telemetry.addLine("HELLLLLLLLLLOOOOOOO " + String.format("%5.3f      %3d     (%3d,%3d)",
+                    //currentBlob.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
+            telemetry.update();
+
+
+            if (!blobs.isEmpty()) {
+                // Assuming you care about the largest blob
+                ColorBlobLocatorProcessor.Blob largestBlob = blobs.get(0);
+
+                // Get the width of the bounding box around the blob in pixels
+                double pixelWidth = 2 * circleFit.getRadius();
+
+                // Calculate the distance
+                distanceFromBlob = 0.9 * (ARTIFACT_REAL_WIDTH_CM * FOCAL_LENGTH_IN_PIXELS) / pixelWidth;
+
+                // the multiplier 0.9 is used to calibrate the distance. could use some fine tuning
+                // Send the information to the Driver Station
+                //telemetry.addData("Distance to Artifact", "%.2f cm", distanceFromBlob);
+
+                //telemetry.addLine("HELLLLLLLLLLOOOOOOO " + String.format("%5.3f      %3d     (%3d,%3d)",
+                 //       currentBlob.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
+                //telemetry.addData("Path", "Complete");
+                telemetry.update();
+            }
+        }
+
+    }
+
+    public void updateBlobs(){
+        blobs = colorLocatorPurple.getBlobs();
+
+        blobs.addAll(colorLocatorGreen.getBlobs());
+
+        ColorBlobLocatorProcessor.Util.filterByCriteria(
+            ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
+            50, 20000, blobs);  // filter out very small blobs.
+
+        ColorBlobLocatorProcessor.Util.filterByCriteria(
+            ColorBlobLocatorProcessor.BlobCriteria.BY_CIRCULARITY, 0.6, 1, blobs);
+
+        if(!blobs.isEmpty()) {
+            currentBlob = blobs.get(0);
+        }
+    }
+
 
     public void manualDrive() {
         double y = -gamepad1.left_stick_y;
