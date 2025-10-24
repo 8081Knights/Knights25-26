@@ -40,6 +40,7 @@ public class DriveRed extends OpMode {
 
     boolean autoJustStopped = false;
 
+
     NewPositionOfRobot currentTarget = null;
 
     VisionPortal visionPortal;
@@ -61,7 +62,6 @@ public class DriveRed extends OpMode {
     double farShootingPos = 0.5;
 
     double closeShootingPos = 0.5;
-
 
     @Override
     public void init() {
@@ -195,6 +195,10 @@ public class DriveRed extends OpMode {
         if(gamepad2.y){
             robot.flyWheelRotator1.setPosition(closeShootingPos);
             robot.flyWheelRotator2.setPosition(closeShootingPos);
+        if(gamepad2.x){
+            robot.intake.setPower(0.5);
+            //uh I think this works 🥀
+        }
         }
 
     }
