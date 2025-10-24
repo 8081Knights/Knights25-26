@@ -15,13 +15,20 @@ public class HardwareSoftware {
 
 
     //wheels
-    public DcMotorEx FRdrive    = null;
-    public DcMotorEx BRdrive    = null;
-    public DcMotorEx BLdrive    = null;
-    public DcMotorEx FLdrive    = null;
-  
+    public DcMotorEx FRdrive      = null;
+    public DcMotorEx BRdrive      = null;
+    public DcMotorEx BLdrive      = null;
+    public DcMotorEx FLdrive      = null;
 
-    //public Servo ServoExample     = null;
+    public DcMotorEx flyWheel     = null;
+
+    public DcMotorEx intake       = null;
+
+    public Servo flyWheelRotator1 = null;
+    public Servo flyWheelRotator2 = null;
+
+
+    public Servo sorterServo     = null;
     
 
     public SparkFunOTOS gyro;
@@ -37,20 +44,33 @@ public class HardwareSoftware {
         BLdrive = hw.get(DcMotorEx.class, "BLdrive");
         BRdrive = hw.get(DcMotorEx.class, "BRdrive");
 
-       
 
-        //ServoExample = hw.get(Servo.class, "ServoExample");
-       
+        flyWheel = hw.get(DcMotorEx.class, "flyWheel");
+        intake = hw.get(DcMotorEx.class, "intake");
+
+
+        sorterServo = hw.get(Servo.class, "sorterServo");
+        flyWheelRotator1 = hw.get(Servo.class, "flyWheel1");
+        flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
+
+
+
 
         FLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         BRdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         FRdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         BLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        flyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-        //Linear.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        //Linear.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
+        flyWheel.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        flyWheel.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+
+        intake.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        intake.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         FLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
         BLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -90,8 +110,8 @@ public class HardwareSoftware {
   
     public SparkFunOTOS gyro(){return gyro;}
 
- //   public Servo ServoExample(){
-     // return ServoExample;
+ //   public Servo sorterServo(){
+     // return sorterServo;
     //}
 
 }

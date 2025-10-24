@@ -32,6 +32,7 @@ package org.firstinspires.ftc.teamcode.Auto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -72,9 +73,9 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="AutoEncoder", group="Robot")
+@Autonomous(name="TurnAndGoToBall", group="Robot")
 
-public class AutoEncoder extends LinearOpMode {
+public class TurnAndGoToBall extends LinearOpMode {
 
     /* Declare OpMode members. */
     private DcMotor         LDrive   = null;
@@ -110,8 +111,8 @@ public class AutoEncoder extends LinearOpMode {
     public void runOpMode() {
 
         // Initialize the drive system variables.
-        LDrive  = hardwareMap.get(DcMotor.class, "Ldrive");
-        RDrive = hardwareMap.get(DcMotor.class, "Rdrive");
+        LDrive  = hardwareMap.get(DcMotor.class, "FLdrive");
+        RDrive = hardwareMap.get(DcMotor.class, "FRdrive");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
