@@ -57,6 +57,12 @@ public class DriveRed extends OpMode {
     ColorBlobLocatorProcessor colorLocatorGreen = null;
 
     double distanceFromBlob;
+
+    double farShootingPos = 0.5;
+
+    double closeShootingPos = 0.5;
+
+
     @Override
     public void init() {
 
@@ -177,6 +183,18 @@ public class DriveRed extends OpMode {
             String formattedX = String.format("%.2f", currentPose.realRobotX);
             String formattedY = String.format("%.2f", currentPose.realRobotY);
             telemetry.addLine("Current Position  X: " + formattedX + "Y: " + formattedY);
+        }
+
+        if(gamepad2.a){
+            robot.flyWheel.setPower(0.5);
+        }
+        if(gamepad2.b) {
+            robot.flyWheelRotator1.setPosition(farShootingPos);
+            robot.flyWheelRotator2.setPosition(farShootingPos);
+        }
+        if(gamepad2.y){
+            robot.flyWheelRotator1.setPosition(closeShootingPos);
+            robot.flyWheelRotator2.setPosition(closeShootingPos);
         }
 
     }
