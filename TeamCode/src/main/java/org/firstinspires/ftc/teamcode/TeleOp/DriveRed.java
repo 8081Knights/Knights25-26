@@ -63,8 +63,7 @@ public class DriveRed extends OpMode {
 
     double closeShootingPos = 0.5;
 
-    double leftServoPos = 0;
-    double rightServoPos = 0;
+    double sorterServoPos = 0;
 
     @Override
     public void init() {
@@ -203,26 +202,21 @@ public class DriveRed extends OpMode {
             //uh I think this works 🥀
         }
         //added methods to find the positions that work, once these are used then you can do set position ones
+            // eventually, have two positions that are trapping a ball on the right and the left
+            //can just toggle between these two positions
         if(gamepad2.right_bumper){
-            leftServoPos += 0.1;
+            sorterServoPos += 0.1;
         }
         if(gamepad2.left_bumper) {
-            leftServoPos -= 0.1;
-        }
-
-        if(gamepad2.right_trigger > 0.5){
-            rightServoPos += 0.1;
-        }
-        if(gamepad2.left_trigger > 0.5) {
-            rightServoPos -= 0.1;
+            sorterServoPos -= 0.1;
         }
 
         if(gamepad2.dpad_up){
-            robot.sorterServo1.setPosition(leftServoPos);
-            robot.sorterServo2.setPosition(rightServoPos);
-            telemetry.addData("leftServoPos", leftServoPos);
-            telemetry.addData("rightServoPos", rightServoPos);
+            robot.sorterServo.setPosition(sorterServoPos);
+            telemetry.addData("sorterServoPos", sorterServoPos);
         }
+
+
 
 
         }
