@@ -75,7 +75,7 @@ public class DriveRed extends OpMode {
 
         robot.gyro.setLinearUnit(DistanceUnit.INCH);
         robot.gyro.setAngularUnit(AngleUnit.RADIANS);
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
         robot.gyro.setOffset(offset);
         robot.gyro.setLinearScalar(1.0);
         robot.gyro.setAngularScalar(1.0);
@@ -159,7 +159,7 @@ public class DriveRed extends OpMode {
 
 
         if (!isMovingToSetPos) {
-            manualDrive();
+            manualMechanumDrive();
         } else {
             updateAutoDrive();
         }
@@ -167,6 +167,11 @@ public class DriveRed extends OpMode {
         if (gamepad1.x) {
             stopAutoMove();
         }
+
+        telemetry.addData("Gyro X: ", robot.gyro.getPosition().x);
+        telemetry.addData("Gyro Y: ", robot.gyro.getPosition().y);
+        telemetry.addData("Gyro H: ", robot.gyro.getPosition().h);
+
 
         //TODO: figure out where the launch zone is
         //either this should be based on the april tags, or just make sure that
@@ -288,7 +293,7 @@ public class DriveRed extends OpMode {
     /**
      * this method handles headless math and controls robot
      */
-    public void manualDrive() {
+    public void manualHeadlessDrive() {
         double y = -gamepad1.left_stick_y;
         double x = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
@@ -304,6 +309,17 @@ public class DriveRed extends OpMode {
         robot.BLdrive.setPower(((rotY - rotX + rx) / denominator));
         robot.FRdrive.setPower(((rotY - rotX - rx) / denominator));
         robot.BRdrive.setPower(((rotY + rotX - rx) / denominator));
+    }
+
+    public void manualMechanumDrive(){
+        double y = -gamepad1.left_stick_y;
+        double x = gamepad1.left_stick_x;
+        double rx = gamepad1.right_stick_x;
+
+        robot.FLdrive.setPower(y - rx - x);
+        robot.FRdrive.setPower(y + rx + x);
+        robot.BLdrive.setPower(y - rx + x);
+        robot.BRdrive.setPower(y + rx - x);
     }
 
 
