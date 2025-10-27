@@ -52,8 +52,8 @@ public class CameraTest extends OpMode {
 
         robot.init(hardwareMap);
 
-        robot.gyro().calibrateImu();
-        robot.gyro().resetTracking();
+        robot.gyro.calibrateImu();
+        robot.gyro.resetTracking();
 
         robot.gyro.setLinearUnit(DistanceUnit.INCH);
         robot.gyro.setAngularUnit(AngleUnit.RADIANS);
