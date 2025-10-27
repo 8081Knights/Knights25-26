@@ -63,13 +63,16 @@ public class DriveRed extends OpMode {
 
     double closeShootingPos = 0.5;
 
+    double leftServoPos = 0;
+    double rightServoPos = 0;
+
     @Override
     public void init() {
 
         robot.init(hardwareMap);
 
-        robot.gyro().calibrateImu();
-        robot.gyro().resetTracking();
+        robot.gyro.calibrateImu();
+        robot.gyro.resetTracking();
 
         robot.gyro.setLinearUnit(DistanceUnit.INCH);
         robot.gyro.setAngularUnit(AngleUnit.RADIANS);
@@ -199,6 +202,29 @@ public class DriveRed extends OpMode {
             robot.intake.setPower(0.5);
             //uh I think this works 🥀
         }
+        //added methods to find the positions that work, once these are used then you can do set position ones
+        if(gamepad2.right_bumper){
+            leftServoPos += 0.1;
+        }
+        if(gamepad2.left_bumper) {
+            leftServoPos -= 0.1;
+        }
+
+        if(gamepad2.right_trigger > 0.5){
+            rightServoPos += 0.1;
+        }
+        if(gamepad2.left_trigger > 0.5) {
+            rightServoPos -= 0.1;
+        }
+
+        if(gamepad2.dpad_up){
+            robot.sorterServo1.setPosition(leftServoPos);
+            robot.sorterServo2.setPosition(rightServoPos);
+            telemetry.addData("leftServoPos", leftServoPos);
+            telemetry.addData("rightServoPos", rightServoPos);
+        }
+
+
         }
 
     }
@@ -271,7 +297,7 @@ public class DriveRed extends OpMode {
         double x = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
 
-        SparkFunOTOS.Pose2D pos = robot.gyro().getPosition();
+        SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
         double botHeading = -Math.toRadians(pos.h) + Math.PI;
 
         double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
