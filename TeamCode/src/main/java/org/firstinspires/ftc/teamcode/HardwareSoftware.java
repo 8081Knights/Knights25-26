@@ -26,9 +26,9 @@ public class HardwareSoftware {
     public Servo flyWheelRotator1 = null;
     public Servo flyWheelRotator2 = null;
 
-    public Servo sorterServo1     = null;
+    public Servo sorterServo     = null;
 
-    public Servo sorterServo2     = null;
+
     
 
     public SparkFunOTOS gyro;
@@ -48,8 +48,7 @@ public class HardwareSoftware {
         intake = hw.get(DcMotorEx.class, "intake");
 
 
-        sorterServo1 = hw.get(Servo.class, "sorterServo1");
-        sorterServo2 = hw.get(Servo.class, "sorterServo2");
+        sorterServo = hw.get(Servo.class, "sorterServo");
 
         flyWheelRotator1 = hw.get(Servo.class, "flyWheel1");
         flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
