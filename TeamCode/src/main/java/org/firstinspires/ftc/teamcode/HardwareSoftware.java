@@ -44,14 +44,14 @@ public class HardwareSoftware {
         BRdrive = hw.get(DcMotorEx.class, "BRdrive");
 
 
-        flyWheel = hw.get(DcMotorEx.class, "flyWheel");
-        intake = hw.get(DcMotorEx.class, "intake");
+        //flyWheel = hw.get(DcMotorEx.class, "flyWheel");
+        //intake = hw.get(DcMotorEx.class, "intake");
 
 
-        sorterServo = hw.get(Servo.class, "sorterServo");
+        //sorterServo = hw.get(Servo.class, "sorterServo");
 
-        flyWheelRotator1 = hw.get(Servo.class, "flyWheel1");
-        flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
+        //flyWheelRotator1 = hw.get(Servo.class, "flyWheel1");
+        //flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
 
         gyro = hw.get(SparkFunOTOS.class, "gyro");
 
@@ -61,6 +61,7 @@ public class HardwareSoftware {
         BRdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         FRdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         BLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        /*
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         flyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -73,10 +74,11 @@ public class HardwareSoftware {
         intake.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        FLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        BLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
+         */
+        FLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        BLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
         FRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        BRdrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        BRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //Linear.setDirection(DcMotorSimple.Direction.REVERSE);
 
