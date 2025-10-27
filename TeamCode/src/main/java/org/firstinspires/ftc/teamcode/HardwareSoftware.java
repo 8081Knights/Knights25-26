@@ -13,7 +13,6 @@ public class HardwareSoftware {
     private HardwareMap hw = null;
 
 
-
     //wheels
     public DcMotorEx FRdrive      = null;
     public DcMotorEx BRdrive      = null;
@@ -27,15 +26,15 @@ public class HardwareSoftware {
     public Servo flyWheelRotator1 = null;
     public Servo flyWheelRotator2 = null;
 
+    public Servo sorterServo1     = null;
 
-    public Servo sorterServo     = null;
+    public Servo sorterServo2     = null;
     
 
     public SparkFunOTOS gyro;
 
 
     public void init(HardwareMap ahw){
-
 
         hw = ahw;
 
@@ -49,10 +48,13 @@ public class HardwareSoftware {
         intake = hw.get(DcMotorEx.class, "intake");
 
 
-        sorterServo = hw.get(Servo.class, "sorterServo");
+        sorterServo1 = hw.get(Servo.class, "sorterServo1");
+        sorterServo2 = hw.get(Servo.class, "sorterServo2");
+
         flyWheelRotator1 = hw.get(Servo.class, "flyWheel1");
         flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
 
+        gyro = hw.get(SparkFunOTOS.class, "gyro");
 
 
 
@@ -85,33 +87,9 @@ public class HardwareSoftware {
         FRdrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         BLdrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        gyro = hw.get(SparkFunOTOS.class, "gyro");
-
         //Linear.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         
 
     }
-
-    public DcMotorEx FLdrive(){
-        return FLdrive;
-    }
-
-    public DcMotorEx FRdrive(){
-        return FRdrive;
-    }
-
-    public DcMotorEx BLdrive(){
-        return BLdrive;
-    }
-
-    public DcMotorEx BRdrive(){
-        return BRdrive;
-    }
-  
-    public SparkFunOTOS gyro(){return gyro;}
-
- //   public Servo sorterServo(){
-     // return sorterServo;
-    //}
 
 }
