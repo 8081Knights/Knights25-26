@@ -291,7 +291,9 @@ public class DriveRed extends OpMode {
         }
     }
 
-
+    /**
+     * this method handles headless math and controls robot
+     */
     public void manualDrive() {
         double y = -gamepad1.left_stick_y;
         double x = gamepad1.left_stick_x;
