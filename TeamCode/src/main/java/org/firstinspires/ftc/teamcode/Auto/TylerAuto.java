@@ -65,6 +65,38 @@ public class TylerAuto extends LinearOpMode {
         robotPoses.add(new NewPositionOfRobot(20, 0, Math.PI * (3/2.0)));
         robotPoses.add(new NewPositionOfRobot(0, 0, 0));
 
+        /* //starting pos: next to the big tower where you shoot the balls
+        // see obelisk and shoot
+        robotPoses.add(new NewPositionOfRobot(30, 0, 0));
+
+        // go down, grab first pattern
+        robotPoses.add(new NewPositionOfRobot(30, 30, Math.PI*.75));
+        robotPoses.add(new NewPositionOfRobot(10, 30, Math.PI*.75));
+
+        // shoot pattern
+        robotPoses.add(new NewPositionOfRobot(30, 0, 0));
+
+        // go down, grab 2nd pattern
+        robotPoses.add(new NewPositionOfRobot(30, 54, Math.PI*.75));
+        robotPoses.add(new NewPositionOfRobot(10, 54, Math.PI*.75));
+
+        // shoot pattern
+        robotPoses.add(new NewPositionOfRobot(30, 0, 0));
+
+        // go down, grab 3rd pattern
+        robotPoses.add(new NewPositionOfRobot(30, 78, Math.PI*.75));
+        robotPoses.add(new NewPositionOfRobot(10, 78, Math.PI*.75));
+
+        // shoot pattern
+        robotPoses.add(new NewPositionOfRobot(30, 0, 0));
+
+        */
+
+        //maybe make it so that based on the pattern it will go to a different spot and get the balls so it does not need to sort it
+        //TODO: add a detect obelisk method
+        //TODO: add a sort method
+        //TODO: add a shoot ball method
+        //TODO: add a shoot using pattern method
 
         currentPose.init(robot,initPositions[0],initPositions[1],initPositions[2]);
     }
