@@ -75,7 +75,8 @@ public class DriveRed extends OpMode {
 
         robot.gyro.setLinearUnit(DistanceUnit.INCH);
         robot.gyro.setAngularUnit(AngleUnit.RADIANS);
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
+
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0.7, 6.186, 0);
         robot.gyro.setOffset(offset);
         robot.gyro.setLinearScalar(1.0);
         robot.gyro.setAngularScalar(1.0);
@@ -159,7 +160,7 @@ public class DriveRed extends OpMode {
 
 
         if (!isMovingToSetPos) {
-            manualMechanumDrive();
+            manualHeadlessDrive();
         } else {
             updateAutoDrive();
         }
@@ -299,27 +300,35 @@ public class DriveRed extends OpMode {
         double rx = gamepad1.right_stick_x;
 
         SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
-        double botHeading = -Math.toRadians(pos.h) + Math.PI;
+        double botHeading = -pos.h;
 
         double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
         double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
 
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        robot.FLdrive.setPower(((rotY + rotX + rx) / denominator));
-        robot.BLdrive.setPower(((rotY - rotX + rx) / denominator));
+        robot.FLdrive.setPower(((rotY - rotX + rx) / denominator));
+        robot.BLdrive.setPower(((rotY + rotX + rx) / denominator));
         robot.FRdrive.setPower(((rotY - rotX - rx) / denominator));
         robot.BRdrive.setPower(((rotY + rotX - rx) / denominator));
     }
-
+    //started changing mechanum and headless,
+    // found that the gyro position was wrong,
+    // swapped x offset and y offset and it works now,
+    // it was changing the x and y values when i was spinning in place
     public void manualMechanumDrive(){
         double y = -gamepad1.left_stick_y;
         double x = gamepad1.left_stick_x;
         double rx = gamepad1.right_stick_x;
 
-        robot.FLdrive.setPower(y - rx - x);
-        robot.FRdrive.setPower(y + rx + x);
-        robot.BLdrive.setPower(y - rx + x);
-        robot.BRdrive.setPower(y + rx - x);
+        robot.FLdrive.setPower(y - x + rx);
+        robot.BLdrive.setPower(y + x + rx);
+        robot.FRdrive.setPower(y - x - rx);
+        robot.BRdrive.setPower(y + x - rx);
+        telemetry.addData("X: ", x);
+        telemetry.addData("Y: ", y);
+        telemetry.addData("RX: ", rx);
+
+
     }
 
 
