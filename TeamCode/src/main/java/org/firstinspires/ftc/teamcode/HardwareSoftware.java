@@ -75,12 +75,19 @@ public class HardwareSoftware {
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
          */
-        FLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        BLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        
+        //old robots set up
+        FLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        BLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
         FRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        BRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        BRdrive.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        //Linear.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        //new robot setup
+        //FLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
+        //BLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        //FRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        //BRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
         FLdrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
