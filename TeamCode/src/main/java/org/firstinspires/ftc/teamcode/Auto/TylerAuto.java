@@ -9,6 +9,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
 
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +22,21 @@ import java.util.List;
 public class TylerAuto extends LinearOpMode {
 
     HardwareSoftware robot = new HardwareSoftware();
+
+    VisionPortal visionPortal;
+    AprilTagProcessor aprilTag;
+    List<AprilTagDetection> detections;
+    int TAGID;
+    final int frameWidth = 1280;
+    int cameraBuffer = frameWidth / 3;
+
+    static final double     COUNTS_PER_INCH         = 33.3;
+
+    private ElapsedTime runtime = new ElapsedTime();
+
+    VisionPortal.Builder vBuilder = new VisionPortal.Builder();
+
+    List<Integer> obeliskTags = List.of(21,22,23);
 
     double[] initPositions = {0,0,0};
 
@@ -68,27 +87,28 @@ public class TylerAuto extends LinearOpMode {
         /* //starting pos: next to the big tower where you shoot the balls
         // see obelisk and shoot
         robotPoses.add(new NewPositionOfRobot(30, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(30, 0, -Math.PI*.5));
 
         // go down, grab first pattern
         robotPoses.add(new NewPositionOfRobot(30, 30, Math.PI*.75));
         robotPoses.add(new NewPositionOfRobot(10, 30, Math.PI*.75));
 
         // shoot pattern
-        robotPoses.add(new NewPositionOfRobot(30, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(30, 0, -Math.PI*.5));
 
         // go down, grab 2nd pattern
         robotPoses.add(new NewPositionOfRobot(30, 54, Math.PI*.75));
         robotPoses.add(new NewPositionOfRobot(10, 54, Math.PI*.75));
 
         // shoot pattern
-        robotPoses.add(new NewPositionOfRobot(30, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(30, 0, -Math.PI*.5));
 
         // go down, grab 3rd pattern
         robotPoses.add(new NewPositionOfRobot(30, 78, Math.PI*.75));
         robotPoses.add(new NewPositionOfRobot(10, 78, Math.PI*.75));
 
         // shoot pattern
-        robotPoses.add(new NewPositionOfRobot(30, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(30, 0, -Math.PI*.5));
 
         */
 
@@ -129,15 +149,27 @@ public class TylerAuto extends LinearOpMode {
 
             //this is for the point scoring, not the wheels
             switch (currentInstruction){
-                case 1:{}
-                case 2:{}
-                case 3:{}
-                case 4:{}
-
                 case 0: {
-                    if (caseStopwatch.seconds() < 2) {
+                    isOkToMoveOn = detectMotif();
+                    break;
+                }
+
+                case 3:
+                case 6:
+                case 9:{
+                    sortBall();
+                    break;
+                }
+
+                case 1:
+                case 4:
+                case 7:
+                case 10:{
+                    if (Math.abs(cerror) > cTreshold) {
                         isOkToMoveOn = false;
-                    } else {
+                    }
+                    else {
+                        shootMotif(TAGID);
                         isOkToMoveOn = true;
                     }
                     break;
@@ -322,6 +354,33 @@ public class TylerAuto extends LinearOpMode {
             angle -= 2 * Math.PI;
         }
         return angle;
+    }
+
+    public void shootPurple() {
+
+    }
+
+    public void shootGreen() {
+
+    }
+
+    public boolean detectMotif() {
+        detections = aprilTag.getDetections();
+        for (AprilTagDetection tag : detections) {
+            if (obeliskTags.contains(tag.id)) {
+                TAGID = tag.id;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void shootMotif(int id) {
+        // shoot the balls in respective pattern
+    }
+
+    public void sortBall() {
+
     }
 
 
