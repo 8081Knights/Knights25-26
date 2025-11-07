@@ -217,7 +217,7 @@ public class TylerAuto extends LinearOpMode {
         boolean justDrive;
         double newx, newy;
         double newRotation;
-        double speed = .8;
+        double speed = .4;
 
         /**
          * Sets the robot's future position and rotation.
