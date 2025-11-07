@@ -104,6 +104,9 @@ public class DriveRed extends OpMode {
     AprilTagDetection det = null;
 
     double cError;
+    double cX;
+    double cY;
+    double cH;
 
 
     //this is the red teleop code
@@ -328,6 +331,9 @@ public class DriveRed extends OpMode {
         telemetry.addData("flyWheelPos2:", robot.flyWheelRotator2.getPosition());
 
         telemetry.addData("cError", cError);
+        telemetry.addData("cX", cX);
+        telemetry.addData("cY", cY);
+        telemetry.addData("cH", cH);
 
 
         if (gamepad2.x) {
@@ -483,6 +489,7 @@ public class DriveRed extends OpMode {
         double error = currentPose.moveToSetPosition(currentTarget);
 
         telemetry.addData("AutoMoving", true);
+
         telemetry.addData("Error", error);
 
         if (Math.abs(error) < cTreshold) {
@@ -743,11 +750,14 @@ public class DriveRed extends OpMode {
             //basically just does headless until it gets to the right position
             double denominator = Math.max(Math.abs(powY) + Math.abs(powX) + Math.abs(rx), 1);
 
-            robot.FLdrive.setPower(((realSetY - realSetX - rx) / denominator) * setPose.speed);
-            robot.BLdrive.setPower(((realSetY + realSetX - rx) / denominator) * setPose.speed);
-            robot.FRdrive.setPower(((realSetY + realSetX + rx) / denominator) * setPose.speed);
-            robot.BRdrive.setPower(((realSetY - realSetX + rx) / denominator) * setPose.speed);
-            currentError = Math.abs(powdX) + powdY + Math.abs(rx);
+            robot.FLdrive.setPower(((-realSetY - realSetX - rx) / denominator) * setPose.speed);
+            robot.BLdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
+            robot.FRdrive.setPower(((-realSetY + realSetX + rx) / denominator) * setPose.speed);
+            robot.BRdrive.setPower(((-realSetY - realSetX + rx) / denominator) * setPose.speed);
+            cX = Math.abs(powdX);
+            cY = Math.abs(powdY);
+            cH = Math.abs(rx);
+            currentError = cX + cY + cH;
             cError = currentError;
             return currentError;
         }
