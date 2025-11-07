@@ -5,27 +5,51 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
 
-@TeleOp(name="DriveTest")
+@TeleOp(name = "DriveTest")
 public class DriveTest extends OpMode {
     HardwareSoftware robot = new HardwareSoftware();
-    public void init(){
+
+    public void init() {
         robot.init(hardwareMap);
     }
-    public void loop(){
+
+    public void loop() {
         if (gamepad1.x) {
             robot.BLdrive.setPower(0.3);
             robot.FLdrive.setPower(0.3);
             robot.BRdrive.setPower(0.3);
             robot.FRdrive.setPower(0.3);
         }
+
         if (gamepad1.a) {
-            robot.FLdrive.setPower(0.7);
+            robot.BLdrive.setPower(0);
+            robot.FLdrive.setPower(0);
+            robot.BRdrive.setPower(0);
+            robot.FRdrive.setPower(0);
         }
-        if (gamepad1.y) {
-            robot.BRdrive.setPower(0.7);
+
+        if (gamepad2.a) {
+            robot.FLdrive.setPower(0.4);
+        } else {
+            robot.FLdrive.setPower(0);
         }
-        if (gamepad1.b) {
-            robot.FRdrive.setPower(0.7);
+
+        if (gamepad2.x) {
+            robot.FRdrive.setPower(0.4);
+        } else {
+            robot.FRdrive.setPower(0);
+        }
+
+        if (gamepad2.b) {
+            robot.BLdrive.setPower(0.4);
+        } else {
+            robot.BLdrive.setPower(0);
+        }
+
+        if (gamepad2.y) {
+            robot.BRdrive.setPower(0.4);
+        } else {
+            robot.BRdrive.setPower(0);
         }
     }
 }

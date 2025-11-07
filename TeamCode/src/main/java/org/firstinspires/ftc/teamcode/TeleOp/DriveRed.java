@@ -66,11 +66,11 @@ public class DriveRed extends OpMode {
 
     double distanceFromBlob;
 
-    double farShootingPos = 0.5;
+    double farShootingPos = 0.4;
 
     double closeShootingPos = 0.5;
 
-    double sorterServoPos = 0;
+    double sorterServoPos = 0.5;
 
 
     boolean showTelem = false;
@@ -103,6 +103,8 @@ public class DriveRed extends OpMode {
 
     AprilTagDetection det = null;
 
+    double cError;
+
 
     //this is the red teleop code
     // it can detect balls by color
@@ -121,9 +123,9 @@ public class DriveRed extends OpMode {
         robot.gyro.setLinearUnit(DistanceUnit.INCH);
         robot.gyro.setAngularUnit(AngleUnit.RADIANS);
         //old robot
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+        //SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
         //new robot
-        //SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
         robot.gyro.setOffset(offset);
         robot.gyro.setLinearScalar(1.0);
         robot.gyro.setAngularScalar(1.0);
@@ -191,6 +193,10 @@ public class DriveRed extends OpMode {
 
 
     }
+
+    //TODO: find out if the april tag math works,
+    // make sure that the position of the robot is actually changing how i think it is
+    // hello
 
     @Override
     public void loop() {
@@ -260,7 +266,7 @@ public class DriveRed extends OpMode {
             telemetry.addData("currentRobotPos", pose2DtoString(absPosOfRobot));
         }
 
-
+        /*
         if (det != null) {
             telemetry.addData("ID", det.id);
             telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
@@ -277,7 +283,7 @@ public class DriveRed extends OpMode {
             }
             telemetry.update();
         }
-
+        */
 
         //TODO: figure out where the launch zone is
         //either this should be based on the april tags, or just make sure that
@@ -286,7 +292,7 @@ public class DriveRed extends OpMode {
             //Pose2D pos = getRelativeDiff(new Pose2D(DistanceUnit.INCH, 40, 40, AngleUnit.RADIANS, 0));
             //relativePosToTarget = pos;
             //NewPositionOfRobot pose = new NewPositionOfRobot(pos.getX(DistanceUnit.INCH), pos.getY(DistanceUnit.INCH), pos.getHeading(AngleUnit.RADIANS));
-            startAutoMove(new NewPositionOfRobot(40, 40, 0));
+            startAutoMove(new NewPositionOfRobot(0, 40, 0));
         }
 
         if (gamepad1.b) {
@@ -305,7 +311,9 @@ public class DriveRed extends OpMode {
         }
 
         if (gamepad2.a) {
-            robot.flyWheel.setPower(0.5);
+            robot.flyWheel.setPower(-0.9);
+        } else {
+            robot.flyWheel.setPower(0);
         }
         if (gamepad2.b) {
             robot.flyWheelRotator1.setPosition(farShootingPos);
@@ -316,10 +324,21 @@ public class DriveRed extends OpMode {
             robot.flyWheelRotator2.setPosition(closeShootingPos);
         }
 
+        telemetry.addData("flyWheelPos1:", robot.flyWheelRotator1.getPosition());
+        telemetry.addData("flyWheelPos2:", robot.flyWheelRotator2.getPosition());
+
+        telemetry.addData("cError", cError);
+
+
         if (gamepad2.x) {
-            robot.intake.setPower(0.5);
+            robot.intake.setPower(0.9);
             //uh I think this works 🥀
+        } else if (gamepad2.left_trigger > 0.5) {
+            robot.intake.setPower(-0.9);
+        } else {
+            robot.intake.setPower(0);
         }
+
         //added methods to find the positions that work, once these are used then you can do set position ones
         // eventually, have two positions that are trapping a ball on the right and the left
         //can just toggle between these two positions
@@ -331,9 +350,16 @@ public class DriveRed extends OpMode {
         }
 
         if (gamepad2.dpad_up) {
-            robot.sorterServo.setPosition(sorterServoPos);
-            telemetry.addData("sorterServoPos", sorterServoPos);
+            robot.sorterServo.setPosition(-0.5);
+            telemetry.addData("sorterServoPos", -0.5);
         }
+
+        if (gamepad2.dpad_down) {
+            robot.sorterServo.setPosition(0.6);
+            telemetry.addData("sorterServoPos", 0.1);
+        }
+
+        telemetry.update();
 
 
     }
@@ -415,8 +441,8 @@ public class DriveRed extends OpMode {
         double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
 
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        robot.FLdrive.setPower(((rotY + rotX + rx) / denominator));
-        robot.BLdrive.setPower(((rotY - rotX + rx) / denominator));
+        robot.FLdrive.setPower(((rotY - rotX + rx) / denominator));
+        robot.BLdrive.setPower(((rotY + rotX + rx) / denominator));
         robot.FRdrive.setPower(((rotY - rotX - rx) / denominator));
         robot.BRdrive.setPower(((rotY + rotX - rx) / denominator));
     }
@@ -701,8 +727,12 @@ public class DriveRed extends OpMode {
             telemetry.addData("diffIn2", diffAngles[2]);
 
 
-            double realSetY = powY * Math.cos(realRobotHeading) - powX * Math.sin(realRobotHeading);
-            double realSetX = powY * Math.sin(realRobotHeading) + powX * Math.cos(realRobotHeading);
+            double dx = setPose.newx - realRobotX;
+            double dy = setPose.newy - realRobotY;
+
+            double botHeading = -realRobotHeading;
+            double realSetX = dx * Math.cos(botHeading) - dy * Math.sin(botHeading);
+            double realSetY = dx * Math.sin(botHeading) + dy * Math.cos(botHeading);
 
             telemetry.addData("powx", powX);
             telemetry.addData("powy", powY);
@@ -713,12 +743,12 @@ public class DriveRed extends OpMode {
             //basically just does headless until it gets to the right position
             double denominator = Math.max(Math.abs(powY) + Math.abs(powX) + Math.abs(rx), 1);
 
-            robot.FLdrive.setPower(((-realSetY - realSetX - rx) / denominator) * setPose.speed);
-            robot.BLdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
-            robot.FRdrive.setPower(((-realSetY + realSetX + rx) / denominator) * setPose.speed);
-            robot.BRdrive.setPower(((-realSetY - realSetX + rx) / denominator) * setPose.speed);
-            currentError = Math.abs(powdX) + Math.abs(powdY) + Math.abs(rx);
-
+            robot.FLdrive.setPower(((realSetY - realSetX - rx) / denominator) * setPose.speed);
+            robot.BLdrive.setPower(((realSetY + realSetX - rx) / denominator) * setPose.speed);
+            robot.FRdrive.setPower(((realSetY + realSetX + rx) / denominator) * setPose.speed);
+            robot.BRdrive.setPower(((realSetY - realSetX + rx) / denominator) * setPose.speed);
+            currentError = Math.abs(powdX) + powdY + Math.abs(rx);
+            cError = currentError;
             return currentError;
         }
 

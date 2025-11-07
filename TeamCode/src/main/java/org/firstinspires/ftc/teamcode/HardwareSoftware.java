@@ -14,27 +14,25 @@ public class HardwareSoftware {
 
 
     //wheels
-    public DcMotorEx FRdrive      = null;
-    public DcMotorEx BRdrive      = null;
-    public DcMotorEx BLdrive      = null;
-    public DcMotorEx FLdrive      = null;
+    public DcMotorEx FRdrive = null;
+    public DcMotorEx BRdrive = null;
+    public DcMotorEx BLdrive = null;
+    public DcMotorEx FLdrive = null;
 
-    public DcMotorEx flyWheel     = null;
+    public DcMotorEx flyWheel = null;
 
-    public DcMotorEx intake       = null;
+    public DcMotorEx intake = null;
 
     public Servo flyWheelRotator1 = null;
     public Servo flyWheelRotator2 = null;
 
-    public Servo sorterServo     = null;
+    public Servo sorterServo = null;
 
-
-    
 
     public SparkFunOTOS gyro;
 
 
-    public void init(HardwareMap ahw){
+    public void init(HardwareMap ahw) {
 
         hw = ahw;
 
@@ -44,23 +42,25 @@ public class HardwareSoftware {
         BRdrive = hw.get(DcMotorEx.class, "BRdrive");
 
 
-        //flyWheel = hw.get(DcMotorEx.class, "flyWheel");
-        //intake = hw.get(DcMotorEx.class, "intake");
+        flyWheel = hw.get(DcMotorEx.class, "flyWheel");
+        intake = hw.get(DcMotorEx.class, "intake");
 
 
-        //sorterServo = hw.get(Servo.class, "sorterServo");
+        sorterServo = hw.get(Servo.class, "sorterServo");
 
-        //flyWheelRotator1 = hw.get(Servo.class, "flyWheel1");
-        //flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
+        flyWheelRotator1 = hw.get(Servo.class, "flyWheel1");
+        flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
 
         gyro = hw.get(SparkFunOTOS.class, "gyro");
-
 
 
         FLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         BRdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         FRdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         BLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+        flyWheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
         /*
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         flyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -75,28 +75,28 @@ public class HardwareSoftware {
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
          */
-        
+
         //old robots set up
-        FLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        BLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        FRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        BRdrive.setDirection(DcMotorSimple.Direction.FORWARD);
+//        FLdrive.setDirection(DcMotorEx.Direction.REVERSE);
+//        BLdrive.setDirection(DcMotorEx.Direction.FORWARD);
+//        FRdrive.setDirection(DcMotorEx.Direction.REVERSE);
+//        BRdrive.setDirection(DcMotorEx.Direction.FORWARD);
+
+        flyWheelRotator2.setDirection(Servo.Direction.REVERSE);
+        flyWheelRotator1.setDirection(Servo.Direction.FORWARD);
 
 
         //new robot setup
-        //FLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        //BLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        //FRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        //BRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        FLdrive.setDirection(DcMotorEx.Direction.REVERSE);
+        BLdrive.setDirection(DcMotorEx.Direction.REVERSE);
+        FRdrive.setDirection(DcMotorEx.Direction.FORWARD);
+        BRdrive.setDirection(DcMotorEx.Direction.FORWARD);
 
         FLdrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         BRdrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         FRdrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         BLdrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
-        //Linear.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        
 
     }
 

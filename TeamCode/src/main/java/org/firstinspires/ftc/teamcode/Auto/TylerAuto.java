@@ -1,4 +1,7 @@
 package org.firstinspires.ftc.teamcode.Auto;
+
+import android.util.Size;
+
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -17,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name="TylerAuto")
+@Autonomous(name = "TylerAuto")
 
 public class TylerAuto extends LinearOpMode {
 
@@ -25,20 +28,20 @@ public class TylerAuto extends LinearOpMode {
 
     VisionPortal visionPortal;
     AprilTagProcessor aprilTag;
-    List<AprilTagDetection> detections;
+    List<AprilTagDetection> detections = new ArrayList<>();
     int TAGID;
     final int frameWidth = 1280;
     int cameraBuffer = frameWidth / 3;
 
-    static final double     COUNTS_PER_INCH         = 33.3;
+    static final double COUNTS_PER_INCH = 33.3;
 
     private ElapsedTime runtime = new ElapsedTime();
 
     VisionPortal.Builder vBuilder = new VisionPortal.Builder();
 
-    List<Integer> obeliskTags = List.of(21,22,23);
+    List<Integer> obeliskTags = List.of(21, 22, 23);
 
-    double[] initPositions = {0,0,0};
+    double[] initPositions = {0, 0, 0};
 
     List<NewPositionOfRobot> robotPoses = new ArrayList<>();
 
@@ -55,20 +58,13 @@ public class TylerAuto extends LinearOpMode {
     double cTreshold = .5;
 
 
-
-
-    public void initThis(){
+    public void initThis() {
 
         robot.init(hardwareMap);
 
-        robot.FLdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        robot.BLdrive.setDirection(DcMotorSimple.Direction.FORWARD);
-        robot.FRdrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        robot.BRdrive.setDirection(DcMotorSimple.Direction.FORWARD);
-
         robot.gyro.setLinearUnit(DistanceUnit.INCH);
         robot.gyro.setAngularUnit(AngleUnit.RADIANS);
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
         robot.gyro.setOffset(offset);
         robot.gyro.setLinearScalar(1.0);
         robot.gyro.setAngularScalar(1.0);
@@ -76,13 +72,36 @@ public class TylerAuto extends LinearOpMode {
         robot.gyro.resetTracking();
         SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
         robot.gyro.setPosition(currentPosition);
+        robot.gyro.resetTracking();
+
+
+        aprilTag = new AprilTagProcessor.Builder()
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagOutline(true)
+                .build();
+
+
+        visionPortal = new VisionPortal.Builder()
+                .addProcessor(aprilTag)
+                .setCameraResolution(new Size(640, 480))
+                .setCamera(hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1"))
+                .enableLiveView(true)
+                .build();
 
         //this is where you add all of the locations for the robot to go to
 
-        robotPoses.add(new NewPositionOfRobot(0, 20, Math.PI / 2.0));
-        robotPoses.add(new NewPositionOfRobot(20, 20, Math.PI));
-        robotPoses.add(new NewPositionOfRobot(20, 0, Math.PI * (3/2.0)));
+
+        robotPoses.add(new NewPositionOfRobot(0, -5, 0));
+        robotPoses.add(new NewPositionOfRobot(5, -5, 0));
+        robotPoses.add(new NewPositionOfRobot(5, 0, 0));
         robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+
+
+//        robotPoses.add(new NewPositionOfRobot(0, 5, Math.PI / 2.0));
+//        robotPoses.add(new NewPositionOfRobot(5, 5, Math.PI));
+//        robotPoses.add(new NewPositionOfRobot(5, 0, Math.PI * (3 / 2.0)));
+//        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
 
         /* //starting pos: next to the big tower where you shoot the balls
         // see obelisk and shoot
@@ -118,8 +137,9 @@ public class TylerAuto extends LinearOpMode {
         //TODO: add a shoot ball method
         //TODO: add a shoot using pattern method
 
-        currentPose.init(robot,initPositions[0],initPositions[1],initPositions[2]);
+        currentPose.init(robot, initPositions[0], initPositions[1], initPositions[2]);
     }
+
     public void runOpMode() throws InterruptedException {
 
         initThis();
@@ -148,35 +168,36 @@ public class TylerAuto extends LinearOpMode {
             telemetry.addData("cerror", cerror);
 
             //this is for the point scoring, not the wheels
-            switch (currentInstruction){
-                case 0: {
-                    isOkToMoveOn = detectMotif();
-                    break;
-                }
 
-                case 3:
-                case 6:
-                case 9:{
-                    sortBall();
-                    break;
-                }
+//            switch (currentInstruction) {
+//                case 0: {
+//                    isOkToMoveOn = detectMotif();
+//                    break;
+//                }
+//
+//                case 3:
+//                case 6:
+//                case 9: {
+//                    sortBall();
+//                    break;
+//                }
+//
+//                case 1:
+//                case 4:
+//                case 7:
+//                case 10: {
+//                    if (Math.abs(cerror) > cTreshold) {
+//                        isOkToMoveOn = false;
+//                    } else {
+//                        shootMotif(TAGID);
+//                        isOkToMoveOn = true;
+//                    }
+//                    break;
+//                }
+//            }
 
-                case 1:
-                case 4:
-                case 7:
-                case 10:{
-                    if (Math.abs(cerror) > cTreshold) {
-                        isOkToMoveOn = false;
-                    }
-                    else {
-                        shootMotif(TAGID);
-                        isOkToMoveOn = true;
-                    }
-                    break;
-                }
-            }
-
-            if (Math.abs(cerror) < cTreshold && isOkToMoveOn) {
+            //can add && isOkayToMoveOne
+            if (Math.abs(cerror) < cTreshold) {
                 caseStopwatch.reset();
                 caseStopwatch.startTime();
                 currentInstruction++;
@@ -184,9 +205,6 @@ public class TylerAuto extends LinearOpMode {
             telemetry.addData("cu", currentInstruction);
 
         }
-
-
-
 
 
     }
@@ -200,6 +218,7 @@ public class TylerAuto extends LinearOpMode {
         double newx, newy;
         double newRotation;
         double speed = .8;
+
         /**
          * Sets the robot's future position and rotation.
          *
@@ -213,6 +232,7 @@ public class TylerAuto extends LinearOpMode {
             this.newRotation = newRot;
             justDrive = true;
         }
+
         NewPositionOfRobot(double nx, double ny, double newRot, double setspeed) {
             this.newx = nx;
             this.newy = ny;
@@ -257,7 +277,7 @@ public class TylerAuto extends LinearOpMode {
 
             realRobotX = initX + gyX;
             realRobotY = initY + gyY;
-            realRobotHeading = initZ + normalizeAngle(gyR);
+            realRobotHeading = initZ + normalizeAngle(-gyR);
         }
 
         /**
@@ -268,7 +288,7 @@ public class TylerAuto extends LinearOpMode {
          */
         double moveToSetPosition(NewPositionOfRobot setPose) {
             double currentError = 0;
-            double powY, powX, rx =0;
+            double powY, powX, rx = 0;
             double powdY, powdX;
 
             powdX = setPose.newx - realRobotX;
@@ -277,21 +297,21 @@ public class TylerAuto extends LinearOpMode {
             if (powdX > 3 || powdX < -3) {
                 powX = Math.signum(powdX);
             } else {
-                powX = powdX/3;
+                powX = powdX / 3;
             }
 
             if (powdY > 3 || powdY < -3) {
                 powY = Math.signum(powdY);
             } else {
-                powY = powdY/3;
+                powY = powdY / 3;
             }
 
             double[] altAngles = new double[3];
             double[] diffAngles = new double[3];
 
-            altAngles[0] =  setPose.newRotation - 2*Math.PI;
-            altAngles[1] =  setPose.newRotation            ;
-            altAngles[2] =  setPose.newRotation + 2*Math.PI;
+            altAngles[0] = setPose.newRotation - 2 * Math.PI;
+            altAngles[1] = setPose.newRotation;
+            altAngles[2] = setPose.newRotation + 2 * Math.PI;
 
             for (int i = 0; i < 3; ++i) {
                 diffAngles[i] = altAngles[i] - realRobotHeading;
@@ -302,7 +322,7 @@ public class TylerAuto extends LinearOpMode {
             int goodindex = 0;
 
             if (Math.abs(diffAngles[1]) < Math.abs(diffAngles[0])) {
-                goodindex =1;
+                goodindex = 1;
             }
             if (Math.abs(diffAngles[2]) < Math.abs(diffAngles[0])) {
                 goodindex = 2;
@@ -321,8 +341,8 @@ public class TylerAuto extends LinearOpMode {
             telemetry.addData("diffIn2", diffAngles[2]);
 
 
-            double realSetY = powY * Math.cos(realRobotHeading) - powX * Math.sin(realRobotHeading);
-            double realSetX = powY * Math.sin(realRobotHeading) + powX * Math.cos(realRobotHeading);
+            double realSetX = powX * Math.cos(-realRobotHeading) - powY * Math.sin(-realRobotHeading);
+            double realSetY = powX * Math.sin(-realRobotHeading) + powY * Math.cos(-realRobotHeading);
 
             telemetry.addData("powx", powX);
             telemetry.addData("powy", powY);
@@ -331,14 +351,13 @@ public class TylerAuto extends LinearOpMode {
             telemetry.addData("rx", rx);
 
 
-
-
             double denominator = Math.max(Math.abs(powY) + Math.abs(powX) + Math.abs(rx), 1);
 
-            robot.FLdrive.setPower((( -realSetY - realSetX - rx) / denominator) * setPose.speed);
-            robot.BLdrive.setPower((( -realSetY + realSetX - rx) / denominator) * setPose.speed);
-            robot.FRdrive.setPower((( -realSetY + realSetX + rx) / denominator) * setPose.speed);
-            robot.BRdrive.setPower((( -realSetY - realSetX + rx) / denominator) * setPose.speed);
+            robot.FLdrive.setPower(((-realSetY - realSetX + rx) / denominator) * setPose.speed);
+            robot.BLdrive.setPower(((-realSetY + realSetX + rx) / denominator) * setPose.speed);
+            robot.FRdrive.setPower(((-realSetY - realSetX - rx) / denominator) * setPose.speed);
+            robot.BRdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
+
             currentError = Math.abs(powdX) + Math.abs(powdY) + Math.abs(rx);
 
             return currentError;
@@ -366,14 +385,17 @@ public class TylerAuto extends LinearOpMode {
 
     public boolean detectMotif() {
         detections = aprilTag.getDetections();
-        for (AprilTagDetection tag : detections) {
-            if (obeliskTags.contains(tag.id)) {
-                TAGID = tag.id;
-                return true;
+        if (!detections.isEmpty()) {
+            for (AprilTagDetection tag : detections) {
+                if (obeliskTags.contains(tag.id)) {
+                    TAGID = tag.id;
+                    return true;
+                }
             }
         }
         return false;
     }
+
 
     public void shootMotif(int id) {
         // shoot the balls in respective pattern
