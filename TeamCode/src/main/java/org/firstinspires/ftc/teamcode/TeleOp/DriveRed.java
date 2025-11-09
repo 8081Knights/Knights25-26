@@ -66,7 +66,7 @@ public class DriveRed extends OpMode {
 
     double distanceFromBlob;
 
-    double farShootingPos = 0.4;
+    double farShootingPos = 0.45;
 
     double closeShootingPos = 0.5;
 
@@ -314,18 +314,24 @@ public class DriveRed extends OpMode {
         }
 
         if (gamepad2.a) {
-            robot.flyWheel.setPower(-0.9);
+            robot.flyWheel.setPower(-0.7);
+        } else if (gamepad2.x) {
+            robot.flyWheel.setPower(-0.85);
         } else {
             robot.flyWheel.setPower(0);
         }
+
         if (gamepad2.b) {
-            robot.flyWheelRotator1.setPosition(farShootingPos);
-            robot.flyWheelRotator2.setPosition(farShootingPos);
+            telemetry.addData("b is pressed", "");
+            robot.flyWheelRotator1.setPosition(farShootingPos + 0.02);
+            robot.flyWheelRotator2.setPosition(farShootingPos + 0.02);
         }
         if (gamepad2.y) {
-            robot.flyWheelRotator1.setPosition(closeShootingPos);
-            robot.flyWheelRotator2.setPosition(closeShootingPos);
+            telemetry.addData("y is pressed", "");
+            robot.flyWheelRotator1.setPosition(farShootingPos + 0.07);
+            robot.flyWheelRotator2.setPosition(farShootingPos + 0.07);
         }
+
 
         telemetry.addData("flyWheelPos1:", robot.flyWheelRotator1.getPosition());
         telemetry.addData("flyWheelPos2:", robot.flyWheelRotator2.getPosition());
@@ -336,11 +342,11 @@ public class DriveRed extends OpMode {
         telemetry.addData("cH", cH);
 
 
-        if (gamepad2.x) {
-            robot.intake.setPower(0.9);
+        if (gamepad2.right_trigger > 0.5) {
+            robot.intake.setPower(0.95);
             //uh I think this works 🥀
         } else if (gamepad2.left_trigger > 0.5) {
-            robot.intake.setPower(-0.9);
+            robot.intake.setPower(-0.95);
         } else {
             robot.intake.setPower(0);
         }
@@ -348,21 +354,15 @@ public class DriveRed extends OpMode {
         //added methods to find the positions that work, once these are used then you can do set position ones
         // eventually, have two positions that are trapping a ball on the right and the left
         //can just toggle between these two positions
-        if (gamepad2.right_bumper) {
-            sorterServoPos += 0.1;
-        }
-        if (gamepad2.left_bumper) {
-            sorterServoPos -= 0.1;
+
+        if (gamepad2.dpad_right) {
+            robot.sorterServo.setPosition(0.4);
+            telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
         }
 
-        if (gamepad2.dpad_up) {
-            robot.sorterServo.setPosition(-0.5);
-            telemetry.addData("sorterServoPos", -0.5);
-        }
-
-        if (gamepad2.dpad_down) {
-            robot.sorterServo.setPosition(0.6);
-            telemetry.addData("sorterServoPos", 0.1);
+        if (gamepad2.dpad_left) {
+            robot.sorterServo.setPosition(0.8);
+            telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
         }
 
         telemetry.update();
@@ -447,8 +447,8 @@ public class DriveRed extends OpMode {
         double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
 
         double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        robot.FLdrive.setPower(((rotY - rotX + rx) / denominator));
-        robot.BLdrive.setPower(((rotY + rotX + rx) / denominator));
+        robot.FLdrive.setPower(((rotY + rotX + rx) / denominator));
+        robot.BLdrive.setPower(((rotY - rotX + rx) / denominator));
         robot.FRdrive.setPower(((rotY - rotX - rx) / denominator));
         robot.BRdrive.setPower(((rotY + rotX - rx) / denominator));
     }
@@ -470,9 +470,9 @@ public class DriveRed extends OpMode {
 //        robot.BRdrive.setPower(y + x - rx);
 
         //headless
-        robot.FLdrive.setPower(y + rx + x);
+        robot.FLdrive.setPower(y + rx - x);
         robot.FRdrive.setPower(y - rx - x);
-        robot.BLdrive.setPower(y + rx - x);
+        robot.BLdrive.setPower(y + rx + x);
         robot.BRdrive.setPower(y - rx + x);
     }
 
