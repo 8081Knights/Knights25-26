@@ -55,6 +55,13 @@ public class TylerAuto extends LinearOpMode {
 
     SparkFunOTOS.Pose2D pos;
 
+    Long time = null;
+
+    double cError;
+    double cX;
+    double cY;
+    double cH;
+
     double cTreshold = .5;
 
 
@@ -95,6 +102,36 @@ public class TylerAuto extends LinearOpMode {
         robotPoses.add(new NewPositionOfRobot(0, -5, 0));
         robotPoses.add(new NewPositionOfRobot(5, -5, 0));
         robotPoses.add(new NewPositionOfRobot(5, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
         robotPoses.add(new NewPositionOfRobot(0, 0, 0));
 
 
@@ -167,37 +204,49 @@ public class TylerAuto extends LinearOpMode {
 
             telemetry.addData("cerror", cerror);
 
+            telemetry.addData("cX", cX);
+            telemetry.addData("cY", cY);
+            telemetry.addData("cH", cH);
+
+
             //this is for the point scoring, not the wheels
 
-//            switch (currentInstruction) {
-//                case 0: {
-//                    isOkToMoveOn = detectMotif();
-//                    break;
-//                }
-//
-//                case 3:
-//                case 6:
-//                case 9: {
-//                    sortBall();
-//                    break;
-//                }
-//
-//                case 1:
-//                case 4:
-//                case 7:
-//                case 10: {
-//                    if (Math.abs(cerror) > cTreshold) {
-//                        isOkToMoveOn = false;
-//                    } else {
-//                        shootMotif(TAGID);
-//                        isOkToMoveOn = true;
-//                    }
-//                    break;
-//                }
-//            }
+            switch (currentInstruction) {
+                case 0: {
+
+                    if (caseStopwatch.seconds() < 2) {
+                        isOkToMoveOn = false;
+                    } else {
+                        isOkToMoveOn = true;
+                    }
+                    //isOkToMoveOn = detectMotif();
+                    break;
+                }
+
+                case 3:
+                case 6:
+                case 9: {
+                    //sortBall();
+                }
+
+                case 1:
+                case 4:
+                case 7:
+                case 10: {
+                    if (caseStopwatch.seconds() < 4) {
+                        isOkToMoveOn = false;
+                    } else {
+                        isOkToMoveOn = true;
+                    }
+                    //isOkToMoveOn = detectMotif();
+
+                    break;
+                }
+            }
+
 
             //can add && isOkayToMoveOne
-            if (Math.abs(cerror) < cTreshold) {
+            if (Math.abs(cerror) < cTreshold || isOkToMoveOn) {
                 caseStopwatch.reset();
                 caseStopwatch.startTime();
                 currentInstruction++;
@@ -358,7 +407,10 @@ public class TylerAuto extends LinearOpMode {
             robot.FRdrive.setPower(((-realSetY - realSetX - rx) / denominator) * setPose.speed);
             robot.BRdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
 
-            currentError = Math.abs(powdX) + Math.abs(powdY) + Math.abs(rx);
+            cX = Math.abs(powdX);
+            cY = Math.abs(powdY);
+            cH = Math.abs(rx);
+            currentError = cX + cY + cH;
 
             return currentError;
         }
