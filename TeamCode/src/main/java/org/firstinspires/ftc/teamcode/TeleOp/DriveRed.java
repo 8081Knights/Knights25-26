@@ -347,8 +347,7 @@ public class DriveRed extends OpMode {
             telemetry.addData("b is pressed", "");
             robot.flyWheelRotator1.setPosition(farShootingPos + 0.02);
             robot.flyWheelRotator2.setPosition(farShootingPos + 0.02);
-        }
-        if (gamepad2.y) {
+        } else if (gamepad2.y) {
             telemetry.addData("y is pressed", "");
             robot.flyWheelRotator1.setPosition(farShootingPos + 0.07);
             robot.flyWheelRotator2.setPosition(farShootingPos + 0.07);
