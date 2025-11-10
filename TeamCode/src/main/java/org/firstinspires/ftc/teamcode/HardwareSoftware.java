@@ -60,7 +60,7 @@ public class HardwareSoftware {
         BLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
         flyWheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-
+        flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         /*
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         flyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

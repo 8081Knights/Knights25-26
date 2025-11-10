@@ -101,6 +101,8 @@ public class DriveRed extends OpMode {
 
     int greenBallPos;
 
+    int targetFlyWheelVelo = 0;
+
     AprilTagDetection det = null;
 
     double cError;
@@ -236,12 +238,12 @@ public class DriveRed extends OpMode {
                         hasMotif = true;
                     }
                 }
-                if (gamepad1.right_bumper) {
-                    showTelem = true;
-                }
-                if (gamepad1.left_bumper) {
-                    showTelem = false;
-                }
+//                if (gamepad1.right_bumper) {
+//                    showTelem = true;
+//                }
+//                if (gamepad1.left_bumper) {
+//                    showTelem = false;
+//                }
             }
         }
 
@@ -312,13 +314,33 @@ public class DriveRed extends OpMode {
             String formattedY = String.format("%.2f", currentPose.realRobotY);
             telemetry.addLine("Current Position  X: " + formattedX + "Y: " + formattedY);
         }
-
+        //TODO: test the current velocity from the set power method, then transition to set velocity
         if (gamepad2.a) {
             robot.flyWheel.setPower(-0.7);
+            telemetry.addData("flywheel rate slow", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
         } else if (gamepad2.x) {
             robot.flyWheel.setPower(-0.85);
+            telemetry.addData("flywheel rate fast", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
         } else {
             robot.flyWheel.setPower(0);
+        }
+
+        if (gamepad1.left_bumper) {
+            targetFlyWheelVelo = 5000;
+        } else if (gamepad1.right_bumper) {
+            targetFlyWheelVelo = 4000;
+        } else {
+            targetFlyWheelVelo = 0;
+        }
+
+        //velocity is degrees per second, so 360 is very slow
+        //might use radians, not sure
+        robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
+        //this checks if the difference is less than 1.5 spins per second
+        if (Math.abs(robot.flyWheel.getVelocity(AngleUnit.DEGREES) - targetFlyWheelVelo) < 360 * 1.5) {
+            //leds turn green
+        } else {
+            //leds turn red
         }
 
         if (gamepad2.b) {
