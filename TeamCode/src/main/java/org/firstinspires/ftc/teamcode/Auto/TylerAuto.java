@@ -111,28 +111,6 @@ public class TylerAuto extends LinearOpMode {
         robotPoses.add(new NewPositionOfRobot(0, 0, 0));
         robotPoses.add(new NewPositionOfRobot(0, 0, 0));
         robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
 
 
 //        robotPoses.add(new NewPositionOfRobot(0, 5, Math.PI / 2.0));
