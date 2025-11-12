@@ -315,15 +315,18 @@ public class DriveRed extends OpMode {
             telemetry.addLine("Current Position  X: " + formattedX + "Y: " + formattedY);
         }
         //TODO: test the current velocity from the set power method, then transition to set velocity
+        //was using 0.7 and 0.85
         if (gamepad2.a) {
-            robot.flyWheel.setPower(-0.7);
+            robot.flyWheel.setPower(-0.5);
             telemetry.addData("flywheel rate slow", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
         } else if (gamepad2.x) {
-            robot.flyWheel.setPower(-0.85);
+            robot.flyWheel.setPower(-0.95);
             telemetry.addData("flywheel rate fast", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
         } else {
             robot.flyWheel.setPower(0);
         }
+
+        //telemetry.addData("Encoder Position", robot.flyWheel.getCurrentPosition());
 
         if (gamepad1.left_bumper) {
             targetFlyWheelVelo = 5000;
@@ -335,12 +338,14 @@ public class DriveRed extends OpMode {
 
         //velocity is degrees per second, so 360 is very slow
         //might use radians, not sure
-        robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
+        //robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
+        telemetry.addData("FlyWheelVelocity: ", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
+        telemetry.addData("TargetFlywheelVelocity: ", targetFlyWheelVelo);
         //this checks if the difference is less than 1.5 spins per second
         if (Math.abs(robot.flyWheel.getVelocity(AngleUnit.DEGREES) - targetFlyWheelVelo) < 360 * 1.5) {
-            //leds turn green
+            telemetry.addLine("RIGHT VELO");
         } else {
-            //leds turn red
+            telemetry.addLine("WRONG VELO");
         }
 
         if (gamepad2.b) {
