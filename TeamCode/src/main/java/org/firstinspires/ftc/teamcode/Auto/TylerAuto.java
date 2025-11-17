@@ -223,7 +223,7 @@ public class TylerAuto extends LinearOpMode {
             }
 
 
-            //can add && isOkayToMoveOne
+            //can add && isOkayToMoveOn
             if (Math.abs(cerror) < cTreshold || isOkToMoveOn) {
                 caseStopwatch.reset();
                 caseStopwatch.startTime();
