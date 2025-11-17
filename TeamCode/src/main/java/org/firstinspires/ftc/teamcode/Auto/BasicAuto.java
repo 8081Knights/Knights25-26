@@ -105,7 +105,7 @@ public class BasicAuto extends LinearOpMode {
 
 
         encoderDrive(DRIVE_SPEED, driveForward(25), 5);
-        /*
+
         primeFlywheel();
         runtime.reset();
         while (runtime.seconds() < 6) {
@@ -114,8 +114,6 @@ public class BasicAuto extends LinearOpMode {
         runtime.reset();
         while (runtime.seconds() < 6) {
         }
-
-         */
 
 
         //shootBall();
