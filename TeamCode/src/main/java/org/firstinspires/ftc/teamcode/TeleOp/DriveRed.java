@@ -20,7 +20,6 @@ import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 
-import java.io.InvalidClassException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +34,6 @@ public class DriveRed extends OpMode {
     DriveRed.CurrentRobotPose currentPose = new CurrentRobotPose();
 
     DecimalFormat df = new DecimalFormat("#.##");
-
 
     SparkFunOTOS.Pose2D pos;
 
@@ -127,9 +125,7 @@ public class DriveRed extends OpMode {
 
         robot.gyro.setLinearUnit(DistanceUnit.INCH);
         robot.gyro.setAngularUnit(AngleUnit.RADIANS);
-        //old robot
-        //SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
-        //new robot
+
         SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
         robot.gyro.setOffset(offset);
         robot.gyro.setLinearScalar(1.0);
@@ -201,7 +197,6 @@ public class DriveRed extends OpMode {
 
     //TODO: find out if the april tag math works,
     // make sure that the position of the robot is actually changing how i think it is
-    // hello
 
     @Override
     public void loop() {
@@ -247,7 +242,7 @@ public class DriveRed extends OpMode {
             }
         }
 
-
+        //can change to mechanum by changing line 247
         if (!isMovingToSetPos) {
             manualHeadlessDrive();
         } else {
@@ -297,7 +292,7 @@ public class DriveRed extends OpMode {
             //Pose2D pos = getRelativeDiff(new Pose2D(DistanceUnit.INCH, 40, 40, AngleUnit.RADIANS, 0));
             //relativePosToTarget = pos;
             //NewPositionOfRobot pose = new NewPositionOfRobot(pos.getX(DistanceUnit.INCH), pos.getY(DistanceUnit.INCH), pos.getHeading(AngleUnit.RADIANS));
-            startAutoMove(new NewPositionOfRobot(0, 40, 0));
+            //startAutoMove(new NewPositionOfRobot(0, 40, 0));
         }
 
         if (gamepad1.b) {
@@ -314,35 +309,30 @@ public class DriveRed extends OpMode {
             String formattedY = String.format("%.2f", currentPose.realRobotY);
             telemetry.addLine("Current Position  X: " + formattedX + "Y: " + formattedY);
         }
-        //TODO: test the current velocity from the set power method, then transition to set velocity
         //was using 0.7 and 0.85
-        if (gamepad2.a) {
-            robot.flyWheel.setPower(-0.5);
-            telemetry.addData("flywheel rate slow", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
-        } else if (gamepad2.x) {
-            robot.flyWheel.setPower(-0.95);
-            telemetry.addData("flywheel rate fast", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
-        } else {
-            robot.flyWheel.setPower(0);
-        }
-
-        //telemetry.addData("Encoder Position", robot.flyWheel.getCurrentPosition());
+//        if (gamepad2.a) {
+//            robot.flyWheel.setPower(-0.5);
+//            telemetry.addData("flywheel rate slow", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
+//        } else if (gamepad2.x) {
+//            robot.flyWheel.setPower(-0.95);
+//            telemetry.addData("flywheel rate fast", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
+//        } else {
+//            robot.flyWheel.setPower(0);
+//        }
 
         if (gamepad1.left_bumper) {
-            targetFlyWheelVelo = 5000;
+            targetFlyWheelVelo = -700;
         } else if (gamepad1.right_bumper) {
-            targetFlyWheelVelo = 4000;
+            targetFlyWheelVelo = -1000;
         } else {
             targetFlyWheelVelo = 0;
         }
 
-        //velocity is degrees per second, so 360 is very slow
-        //might use radians, not sure
-        //robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
+        robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
         telemetry.addData("FlyWheelVelocity: ", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
         telemetry.addData("TargetFlywheelVelocity: ", targetFlyWheelVelo);
         //this checks if the difference is less than 1.5 spins per second
-        if (Math.abs(robot.flyWheel.getVelocity(AngleUnit.DEGREES) - targetFlyWheelVelo) < 360 * 1.5) {
+        if (Math.abs(robot.flyWheel.getVelocity(AngleUnit.DEGREES) - targetFlyWheelVelo) < 25) {
             telemetry.addLine("RIGHT VELO");
         } else {
             telemetry.addLine("WRONG VELO");
