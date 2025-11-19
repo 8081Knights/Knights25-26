@@ -71,7 +71,7 @@ public class DriveRed extends OpMode {
     double sorterServoPos = 0.5;
 
 
-    boolean showTelem = false;
+    boolean showTelem = true;
 
     double diffGyroStartingPosX = 0;
     double diffGyroStartingPosY = 0;
@@ -204,43 +204,61 @@ public class DriveRed extends OpMode {
         //current blob telemetry is commented out
         handleBlobs();
         detections = aprilTag.getDetections();
-        if (!detections.isEmpty()) {
-            telemetry.addLine("HAS TAG");
+        telemetry.clear();
+        if (detections.isEmpty()) {
+            telemetry.addLine("No tags detected");
+        } else {
+            telemetry.addLine("Detected tags:");
             for (AprilTagDetection detec : detections) {
-                det = detec;
-                if (absPosOfGryoStart == null) {
-                    det = detec;
-                    if (det.id == redTagId) {
-                        findAbsRobotPos(redTagPos);
-                        calculateGyroStartPos();
-                    }
-                    if (det.id == blueTagId) {
-                        findAbsRobotPos(blueTagPos);
-                        calculateGyroStartPos();
-                    }
+                telemetry.addData("ID", detec.id);
+                telemetry.addData("Center", "(%.2f, %.2f)", detec.center.x, detec.center.y);
+                if (detec.ftcPose != null) {
+                    telemetry.addData("Pose X", detec.ftcPose.x);
+                    telemetry.addData("Pose Y", detec.ftcPose.y);
+                    telemetry.addData("Yaw (rad)", detec.ftcPose.yaw);
                 }
-                if (!hasMotif) {
-                    if (det.id == motifTagIds[0]) {
-                        greenBallPos = 0;
-                        hasMotif = true;
-                    }
-                    if (det.id == motifTagIds[1]) {
-                        greenBallPos = 1;
-                        hasMotif = true;
-                    }
-                    if (det.id == motifTagIds[2]) {
-                        greenBallPos = 2;
-                        hasMotif = true;
-                    }
-                }
-//                if (gamepad1.right_bumper) {
-//                    showTelem = true;
-//                }
-//                if (gamepad1.left_bumper) {
-//                    showTelem = false;
-//                }
             }
         }
+
+//        detections = aprilTag.getDetections();
+//        if (!detections.isEmpty()) {
+//            telemetry.addLine("HAS TAG");
+//            for (AprilTagDetection detec : detections) {
+//                det = detec;
+//                if (absPosOfGryoStart == null) {
+//                    det = detec;
+//                    if (det.id == redTagId) {
+//                        findAbsRobotPos(redTagPos);
+//                        calculateGyroStartPos();
+//                    }
+//                    if (det.id == blueTagId) {
+//                        findAbsRobotPos(blueTagPos);
+//                        calculateGyroStartPos();
+//                    }
+//                }
+//                if (!hasMotif) {
+//                    if (det.id == motifTagIds[0]) {
+//                        greenBallPos = 0;
+//                        hasMotif = true;
+//                    }
+//                    if (det.id == motifTagIds[1]) {
+//                        greenBallPos = 1;
+//                        hasMotif = true;
+//                    }
+//                    if (det.id == motifTagIds[2]) {
+//                        greenBallPos = 2;
+//                        hasMotif = true;
+//                    }
+//                }
+//                if (gamepad1.dpad_left) {
+//                    showTelem = true;
+//                }
+//                if (gamepad1.dpad_right) {
+//                    showTelem = false;
+//                }
+//
+//            }
+//        }
 
         //can change to mechanum by changing line 247
         if (!isMovingToSetPos) {
@@ -252,18 +270,19 @@ public class DriveRed extends OpMode {
         if (gamepad1.x) {
             stopAutoMove();
         }
+        //telemetry.addData("cameraTelem", showTelem);
 
-        telemetry.addData("Gyro X: ", robot.gyro.getPosition().x);
-        telemetry.addData("Gyro Y: ", robot.gyro.getPosition().y);
-        telemetry.addData("Gyro H: ", robot.gyro.getPosition().h);
-        telemetry.addData("knows gyro starting pos", absPosOfGryoStart != null);
+        //telemetry.addData("Gyro X: ", robot.gyro.getPosition().x);
+        //telemetry.addData("Gyro Y: ", robot.gyro.getPosition().y);
+        //telemetry.addData("Gyro H: ", robot.gyro.getPosition().h);
+        //telemetry.addData("knows gyro starting pos", absPosOfGryoStart != null);
         if (absPosOfGryoStart != null) {
-            telemetry.addData("startingPosGyro", pose2DtoString(absPosOfGryoStart));
+            //telemetry.addData("startingPosGyro", pose2DtoString(absPosOfGryoStart));
             updateAbsoluteRobotPos();
 
         }
         if (absPosOfRobot != null) {
-            telemetry.addData("currentRobotPos", pose2DtoString(absPosOfRobot));
+            //telemetry.addData("currentRobotPos", pose2DtoString(absPosOfRobot));
         }
 
         /*
@@ -292,7 +311,7 @@ public class DriveRed extends OpMode {
             //Pose2D pos = getRelativeDiff(new Pose2D(DistanceUnit.INCH, 40, 40, AngleUnit.RADIANS, 0));
             //relativePosToTarget = pos;
             //NewPositionOfRobot pose = new NewPositionOfRobot(pos.getX(DistanceUnit.INCH), pos.getY(DistanceUnit.INCH), pos.getHeading(AngleUnit.RADIANS));
-            //startAutoMove(new NewPositionOfRobot(0, 40, 0));
+            startAutoMove(new NewPositionOfRobot(0, 40, 0));
         }
 
         if (gamepad1.b) {
@@ -307,7 +326,7 @@ public class DriveRed extends OpMode {
             currentPose.updateRealRobotPositions(pos);
             String formattedX = String.format("%.2f", currentPose.realRobotX);
             String formattedY = String.format("%.2f", currentPose.realRobotY);
-            telemetry.addLine("Current Position  X: " + formattedX + "Y: " + formattedY);
+            //telemetry.addLine("Current Position  X: " + formattedX + "Y: " + formattedY);
         }
         //was using 0.7 and 0.85
 //        if (gamepad2.a) {
@@ -329,28 +348,28 @@ public class DriveRed extends OpMode {
         }
 
         robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
-        telemetry.addData("FlyWheelVelocity: ", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
-        telemetry.addData("TargetFlywheelVelocity: ", targetFlyWheelVelo);
+        //telemetry.addData("FlyWheelVelocity: ", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
+        //telemetry.addData("TargetFlywheelVelocity: ", targetFlyWheelVelo);
         //this checks if the difference is less than 1.5 spins per second
         if (Math.abs(robot.flyWheel.getVelocity(AngleUnit.DEGREES) - targetFlyWheelVelo) < 25) {
-            telemetry.addLine("RIGHT VELO");
+            // telemetry.addLine("RIGHT VELO");
         } else {
-            telemetry.addLine("WRONG VELO");
+            // telemetry.addLine("WRONG VELO");
         }
 
         if (gamepad2.b) {
-            telemetry.addData("b is pressed", "");
+            //telemetry.addData("b is pressed", "");
             robot.flyWheelRotator1.setPosition(farShootingPos + 0.02);
             robot.flyWheelRotator2.setPosition(farShootingPos + 0.02);
         } else if (gamepad2.y) {
-            telemetry.addData("y is pressed", "");
+            //telemetry.addData("y is pressed", "");
             robot.flyWheelRotator1.setPosition(farShootingPos + 0.07);
             robot.flyWheelRotator2.setPosition(farShootingPos + 0.07);
         }
 
 
-        telemetry.addData("flyWheelPos1:", robot.flyWheelRotator1.getPosition());
-        telemetry.addData("flyWheelPos2:", robot.flyWheelRotator2.getPosition());
+        //telemetry.addData("flyWheelPos1:", robot.flyWheelRotator1.getPosition());
+        // telemetry.addData("flyWheelPos2:", robot.flyWheelRotator2.getPosition());
 
         telemetry.addData("cError", cError);
         telemetry.addData("cX", cX);
@@ -373,12 +392,12 @@ public class DriveRed extends OpMode {
 
         if (gamepad2.dpad_right) {
             robot.sorterServo.setPosition(0.4);
-            telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
+            //  telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
         }
 
         if (gamepad2.dpad_left) {
             robot.sorterServo.setPosition(0.8);
-            telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
+            // telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
         }
 
         telemetry.update();
@@ -504,9 +523,9 @@ public class DriveRed extends OpMode {
 
         double error = currentPose.moveToSetPosition(currentTarget);
 
-        telemetry.addData("AutoMoving", true);
+        // telemetry.addData("AutoMoving", true);
 
-        telemetry.addData("Error", error);
+        // telemetry.addData("Error", error);
 
         if (Math.abs(error) < cTreshold) {
             stopAutoMove();
@@ -523,7 +542,7 @@ public class DriveRed extends OpMode {
         robot.BLdrive.setPower(0);
         robot.BRdrive.setPower(0);
         telemetry.clear();
-        telemetry.addData("AutoMove: ", "Stopped");
+        // telemetry.addData("AutoMove: ", "Stopped");
         telemetry.update();
         autoJustStopped = true;
     }
@@ -626,7 +645,7 @@ public class DriveRed extends OpMode {
         boolean justDrive;
         double newx, newy;
         double newRotation;
-        double speed = .8;
+        double speed = .3;
 
         /**
          * Sets the robot's future position and rotation.
@@ -745,9 +764,9 @@ public class DriveRed extends OpMode {
 
             rx = diffAngles[goodindex];
 
-            telemetry.addData("diffIn0", diffAngles[0]);
-            telemetry.addData("diffIn1", diffAngles[1]);
-            telemetry.addData("diffIn2", diffAngles[2]);
+//            telemetry.addData("diffIn0", diffAngles[0]);
+//            telemetry.addData("diffIn1", diffAngles[1]);
+//            telemetry.addData("diffIn2", diffAngles[2]);
 
 
             double dx = setPose.newx - realRobotX;
@@ -757,11 +776,11 @@ public class DriveRed extends OpMode {
             double realSetX = dx * Math.cos(botHeading) - dy * Math.sin(botHeading);
             double realSetY = dx * Math.sin(botHeading) + dy * Math.cos(botHeading);
 
-            telemetry.addData("powx", powX);
-            telemetry.addData("powy", powY);
-            telemetry.addData("realSetX", realSetX);
-            telemetry.addData("realSetY", realSetY);
-            telemetry.addData("rx", rx);
+//            telemetry.addData("powx", powX);
+//            telemetry.addData("powy", powY);
+//            telemetry.addData("realSetX", realSetX);
+//            telemetry.addData("realSetY", realSetY);
+//            telemetry.addData("rx", rx);
 
             //basically just does headless until it gets to the right position
             double denominator = Math.max(Math.abs(powY) + Math.abs(powX) + Math.abs(rx), 1);
@@ -770,8 +789,8 @@ public class DriveRed extends OpMode {
             robot.BLdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
             robot.FRdrive.setPower(((-realSetY + realSetX + rx) / denominator) * setPose.speed);
             robot.BRdrive.setPower(((-realSetY - realSetX + rx) / denominator) * setPose.speed);
-            cX = Math.abs(powdX);
-            cY = Math.abs(powdY);
+            cX = Math.abs(dx);
+            cY = Math.abs(dy);
             cH = Math.abs(rx);
             currentError = cX + cY + cH;
             cError = currentError;
