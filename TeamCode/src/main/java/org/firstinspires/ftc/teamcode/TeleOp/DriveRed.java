@@ -82,6 +82,7 @@ public class DriveRed extends OpMode {
     // assuming field size roughly 144 x 144 inches (FTC field)
     Pose2D redTagPos = new Pose2D(DistanceUnit.INCH, 132, 120, AngleUnit.DEGREES, 225);
     Pose2D blueTagPos = new Pose2D(DistanceUnit.INCH, 12, 120, AngleUnit.DEGREES, 315);
+    Pose2D currentTagPos = null;
 
     Pose2D absPosOfGryoStart = null;
 
@@ -108,6 +109,7 @@ public class DriveRed extends OpMode {
     double cY;
     double cH;
 
+    int numDetections = 0;
 
     //this is the red teleop code
     // it can detect balls by color
@@ -204,21 +206,8 @@ public class DriveRed extends OpMode {
         //current blob telemetry is commented out
         handleBlobs();
         detections = aprilTag.getDetections();
+        numDetections = detections.size();
         telemetry.clear();
-        if (detections.isEmpty()) {
-            telemetry.addLine("No tags detected");
-        } else {
-            telemetry.addLine("Detected tags:");
-            for (AprilTagDetection detec : detections) {
-                telemetry.addData("ID", detec.id);
-                telemetry.addData("Center", "(%.2f, %.2f)", detec.center.x, detec.center.y);
-                if (detec.ftcPose != null) {
-                    telemetry.addData("Pose X", detec.ftcPose.x);
-                    telemetry.addData("Pose Y", detec.ftcPose.y);
-                    telemetry.addData("Yaw (rad)", detec.ftcPose.yaw);
-                }
-            }
-        }
 
 //        detections = aprilTag.getDetections();
 //        if (!detections.isEmpty()) {
@@ -237,18 +226,13 @@ public class DriveRed extends OpMode {
 //                    }
 //                }
 //                if (!hasMotif) {
-//                    if (det.id == motifTagIds[0]) {
-//                        greenBallPos = 0;
-//                        hasMotif = true;
-//                    }
-//                    if (det.id == motifTagIds[1]) {
-//                        greenBallPos = 1;
-//                        hasMotif = true;
-//                    }
-//                    if (det.id == motifTagIds[2]) {
-//                        greenBallPos = 2;
-//                        hasMotif = true;
-//                    }
+//          for(int i = 0; i < 3; i++) {
+//              if (det.id == motifTagIds[i]) {
+//                  greenBallPos = i;
+//                  hasMotif = true;
+//              }
+//          }
+//
 //                }
 //                if (gamepad1.dpad_left) {
 //                    showTelem = true;
@@ -285,24 +269,56 @@ public class DriveRed extends OpMode {
             //telemetry.addData("currentRobotPos", pose2DtoString(absPosOfRobot));
         }
 
-        /*
+        telemetry.addData("numDetections: ", numDetections);
+        if (numDetections != 0) {
+            det = detections.get(0);
+        }
         if (det != null) {
-            telemetry.addData("ID", det.id);
-            telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
-            if (det.ftcPose == null) {
-                telemetry.addData("IDK WHY", "IDK WHY");
-            } else {
+            if (det.id == redTagId || det.id == blueTagId) {
+                if (det.id == redTagId) {
+                    currentTagPos = redTagPos;
+                } else {
+                    currentTagPos = blueTagPos;
+                }
+
+                telemetry.addData("ID", det.id);
+                telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
+
                 telemetry.addData("Pose X", det.ftcPose.x);
                 telemetry.addData("Pose Y", det.ftcPose.y);
                 telemetry.addData("Heading (deg)", det.ftcPose.yaw);
                 telemetry.addData("Range", det.ftcPose.range);
-                double calulatedX = det.ftcPose.range * Math.cos(det.ftcPose.yaw);
-                telemetry.addData("calulated X", calulatedX);
-                telemetry.addData("diffX", calulatedX - det.ftcPose.x);
+
+
+                double tagHeadingRad = Math.toRadians(currentTagPos.getHeading(AngleUnit.DEGREES));
+                double relX = det.ftcPose.x;
+                double relY = det.ftcPose.y;
+
+                double yField = currentTagPos.getX(DistanceUnit.INCH)
+                        + relX * Math.cos(tagHeadingRad)
+                        - relY * Math.sin(tagHeadingRad);
+
+                double xField = currentTagPos.getY(DistanceUnit.INCH)
+                        + relX * Math.sin(tagHeadingRad)
+                        + relY * Math.cos(tagHeadingRad);
+
+                telemetry.addData("field X", xField);
+                telemetry.addData("field Y", yField);
+
+            } else {
+                for (int i = 0; i < 3; i++) {
+                    if (det.id == motifTagIds[i]) {
+                        greenBallPos = i;
+                    }
+                    hasMotif = true;
+
+                }
             }
-            telemetry.update();
         }
-        */
+
+        telemetry.addData("Has motif: ", hasMotif);
+        telemetry.addData("motif: ", greenBallPos);
+
 
         //TODO: figure out where the launch zone is
         //either this should be based on the april tags, or just make sure that
@@ -359,12 +375,12 @@ public class DriveRed extends OpMode {
 
         if (gamepad2.b) {
             //telemetry.addData("b is pressed", "");
-            robot.flyWheelRotator1.setPosition(farShootingPos + 0.02);
-            robot.flyWheelRotator2.setPosition(farShootingPos + 0.02);
+            robot.flyWheelRotator1.setPosition(farShootingPos - 0.2);
+            robot.flyWheelRotator2.setPosition(farShootingPos - 0.2);
         } else if (gamepad2.y) {
             //telemetry.addData("y is pressed", "");
-            robot.flyWheelRotator1.setPosition(farShootingPos + 0.07);
-            robot.flyWheelRotator2.setPosition(farShootingPos + 0.07);
+            robot.flyWheelRotator1.setPosition(farShootingPos - 0.1);
+            robot.flyWheelRotator2.setPosition(farShootingPos - 0.1);
         }
 
 
@@ -424,8 +440,6 @@ public class DriveRed extends OpMode {
             circleFit = currentBlob.getCircle();
             //telemetry.addLine("HELLLLLLLLLLOOOOOOO " + String.format("%5.3f      %3d     (%3d,%3d)",
             //currentBlob.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
-            telemetry.update();
-
 
             if (!blobs.isEmpty()) {
                 // Assuming you care about the largest blob
@@ -444,7 +458,6 @@ public class DriveRed extends OpMode {
                 //telemetry.addLine("HELLLLLLLLLLOOOOOOO " + String.format("%5.3f      %3d     (%3d,%3d)",
                 //       currentBlob.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
                 //telemetry.addData("Path", "Complete");
-                telemetry.update();
             }
         }
 
@@ -543,7 +556,6 @@ public class DriveRed extends OpMode {
         robot.BRdrive.setPower(0);
         telemetry.clear();
         // telemetry.addData("AutoMove: ", "Stopped");
-        telemetry.update();
         autoJustStopped = true;
     }
 
