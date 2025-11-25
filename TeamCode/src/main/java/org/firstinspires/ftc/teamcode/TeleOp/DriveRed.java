@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 import android.graphics.Color;
 import android.util.Size;
 
@@ -297,12 +300,12 @@ public class DriveRed extends OpMode {
 				double relY = det.ftcPose.y;
 
 				double yField = currentTagPos.getX(DistanceUnit.INCH)
-						+ relX * Math.cos(tagHeadingRad)
-						- relY * Math.sin(tagHeadingRad);
+						+ relX * cos(tagHeadingRad)
+						- relY * sin(tagHeadingRad);
 
 				double xField = currentTagPos.getY(DistanceUnit.INCH)
-						+ relX * Math.sin(tagHeadingRad)
-						+ relY * Math.cos(tagHeadingRad);
+						+ relX * sin(tagHeadingRad)
+						+ relY * cos(tagHeadingRad);
 
 				telemetry.addData("field X", xField);
 				telemetry.addData("field Y", yField);
@@ -313,9 +316,21 @@ public class DriveRed extends OpMode {
 				double gy = robot.gyro.getPosition().y;
 				double gh = robot.gyro.getPosition().h;
 
+
+				double currentRobotHeadingField = det.ftcPose.yaw - currentTagPos.getHeading(AngleUnit.DEGREES);
+				double gyroHeadingOrigin = currentRobotHeadingField - Math.toDegrees(gh);
+				telemetry.addData("current tag heading", currentTagPos.getHeading(AngleUnit.DEGREES));
+				telemetry.addData("yaw", det.ftcPose.yaw);
+				telemetry.addData("currentRobotHeading", currentRobotHeadingField);
+				telemetry.addData("gyroHeadingOrigin", gyroHeadingOrigin);
+
+
+				//need to get this gh to be the offset between the gyro-h start and the field
 				// Rotate gyro offsets into field space
-				double gxField = gx * Math.cos(gh) - gy * Math.sin(gh);
-				double gyField = gx * Math.sin(gh) + gy * Math.cos(gh);
+				double[] gyroOriginCords = rotateCord(gx, gy, gyroHeadingOrigin, false);
+
+				double gxField = gyroOriginCords[0];
+				double gyField = gyroOriginCords[1];
 
 				telemetry.addData("gyroOriginX: ", gxField);
 				telemetry.addData("gyroOriginY: ", gyField);
@@ -331,8 +346,8 @@ public class DriveRed extends OpMode {
 			}
 		}
 
-		telemetry.addData("Has motif: ", hasMotif);
-		telemetry.addData("motif: ", greenBallPos);
+		//telemetry.addData("Has motif: ", hasMotif);
+		//telemetry.addData("motif: ", greenBallPos);
 
 
 		//TODO: figure out where the launch zone is
@@ -506,8 +521,9 @@ public class DriveRed extends OpMode {
 		SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
 		double botHeading = -pos.h;
 
-		double rotX = x * Math.cos(botHeading) - y * Math.sin(botHeading);
-		double rotY = x * Math.sin(botHeading) + y * Math.cos(botHeading);
+		double[] rotCords = rotateCord(x, y, botHeading, false);
+		double rotX = rotCords[0];
+		double rotY = rotCords[1];
 
 		double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
 		robot.FLdrive.setPower(((rotY + rotX + rx) / denominator));
@@ -537,6 +553,25 @@ public class DriveRed extends OpMode {
 		robot.FRdrive.setPower(y - rx - x);
 		robot.BLdrive.setPower(y + rx + x);
 		robot.BRdrive.setPower(y - rx + x);
+	}
+
+	/**
+	 * rotates coordinates by theta
+	 *
+	 * @param x
+	 * @param y
+	 * @param theta     degrees
+	 * @param isDegrees
+	 * @return double array with {x, y}
+	 */
+	public double[] rotateCord(double x, double y, double theta, boolean isDegrees) {
+		double[] cords = {0, 0};
+		if (isDegrees) {
+			theta = Math.toRadians(theta);
+		}
+		cords[0] = x * Math.cos(theta) - y * Math.sin(theta);
+		cords[1] = x * Math.sin(theta) - y * Math.cos(theta);
+		return cords;
 	}
 
 
@@ -603,8 +638,9 @@ public class DriveRed extends OpMode {
 				double relX = det.ftcPose.x;
 				double relY = det.ftcPose.y;
 
-				double rotatedX = relX * Math.cos(tagHeadingRad) - relY * Math.sin(tagHeadingRad);
-				double rotatedY = relX * Math.sin(tagHeadingRad) + relY * Math.cos(tagHeadingRad);
+
+				double rotatedX = relX * cos(tagHeadingRad) - relY * sin(tagHeadingRad);
+				double rotatedY = relX * sin(tagHeadingRad) + relY * cos(tagHeadingRad);
 
 				//these are the current position of the robot relative to the field, not the gyro
 				double fieldX = absTagPose.getX(DistanceUnit.INCH) + rotatedX;
@@ -800,8 +836,8 @@ public class DriveRed extends OpMode {
 			double dy = setPose.newy - realRobotY;
 
 			double botHeading = -realRobotHeading;
-			double realSetX = dx * Math.cos(botHeading) - dy * Math.sin(botHeading);
-			double realSetY = dx * Math.sin(botHeading) + dy * Math.cos(botHeading);
+			double realSetX = dx * cos(botHeading) - dy * sin(botHeading);
+			double realSetY = dx * sin(botHeading) + dy * cos(botHeading);
 
 //            telemetry.addData("powx", powX);
 //            telemetry.addData("powy", powY);
