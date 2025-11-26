@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.HelperMethods.*;
+import static org.firstinspires.ftc.teamcode.subsystems.CameraSensor.*;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
@@ -14,8 +16,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.teamcode.subsystems.CurrentRobotPose;
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
+import org.firstinspires.ftc.teamcode.subsystems.NewPositionOfRobot;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.opencv.Circle;
@@ -25,7 +30,6 @@ import org.firstinspires.ftc.vision.opencv.ImageRegion;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @TeleOp(name = "DriveRed")
@@ -34,7 +38,7 @@ public class DriveRed extends OpMode {
 
 	double[] initPositions = {0, 0, 0};
 
-	DriveRed.CurrentRobotPose currentPose = new CurrentRobotPose();
+	CurrentRobotPose currentPose = new CurrentRobotPose();
 
 	DecimalFormat df = new DecimalFormat("#.##");
 
@@ -51,8 +55,7 @@ public class DriveRed extends OpMode {
 
 	NewPositionOfRobot currentTarget = null;
 
-	VisionPortal visionPortal;
-	AprilTagProcessor aprilTag;
+
 	ArrayList<AprilTagDetection> detections;
 
 	Circle circleFit = null;
@@ -61,9 +64,6 @@ public class DriveRed extends OpMode {
 
 	List<ColorBlobLocatorProcessor.Blob> blobs = null;
 
-	ColorBlobLocatorProcessor colorLocatorPurple = null;
-
-	ColorBlobLocatorProcessor colorLocatorGreen = null;
 
 	double distanceFromBlob;
 
@@ -105,6 +105,8 @@ public class DriveRed extends OpMode {
 
 	int targetFlyWheelVelo = 0;
 
+	VisionPortal visionPortal;
+
 	AprilTagDetection det = null;
 
 	double cError;
@@ -114,17 +116,14 @@ public class DriveRed extends OpMode {
 
 	int numDetections = 0;
 
+
 	//this is the red teleop code
 	// it can detect balls by color
 	// use april tags
 	// know where it is and where its gyro-origin is
 	// go to an absolute position on the field
 
-	@Override
-	public void init() {
-
-		robot.init(hardwareMap);
-
+	public void initGyro() {
 		robot.gyro.calibrateImu();
 		robot.gyro.resetTracking();
 
@@ -139,60 +138,19 @@ public class DriveRed extends OpMode {
 		robot.gyro.resetTracking();
 		SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
 		robot.gyro.setPosition(currentPosition);
+	}
 
-		aprilTag = new AprilTagProcessor.Builder()
-				.setDrawAxes(true)
-				.setDrawCubeProjection(true)
-				.setDrawTagOutline(true)
-				.build();
+	@Override
+	public void init() {
 
-		colorLocatorPurple = new ColorBlobLocatorProcessor.Builder()
-				.setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
-				.setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-				.setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-				.setDrawContours(true)   // Show contours on the Stream Preview
-				.setBoxFitColor(0)       // Disable the drawing of rectangles
-				.setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
-				.setBlurSize(5)          // Smooth the transitions between different colors in image
+		robot.init(hardwareMap);
 
-				// the following options have been added to fill in perimeter holes.
-				.setDilateSize(15)       // Expand blobs to fill any divots on the edges
-				.setErodeSize(15)        // Shrink blobs back to original size
-				.setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
-
-				.build();
-
-		colorLocatorGreen = new ColorBlobLocatorProcessor.Builder()
-				.setTargetColorRange(ColorRange.ARTIFACT_GREEN)   // Use a predefined color match
-				.setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-				.setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-				.setDrawContours(true)   // Show contours on the Stream Preview
-				.setBoxFitColor(0)       // Disable the drawing of rectangles
-				.setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
-				.setBlurSize(5)          // Smooth the transitions between different colors in image
-
-				// the following options have been added to fill in perimeter holes.
-				.setDilateSize(15)       // Expand blobs to fill any divots on the edges
-				.setErodeSize(15)        // Shrink blobs back to original size
-				.setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
-
-				.build();
+		initGyro();
 
 
-		visionPortal = new VisionPortal.Builder()
-				.addProcessor(aprilTag)
-				.addProcessor(colorLocatorGreen)
-				.addProcessor(colorLocatorPurple)
-				.setCameraResolution(new Size(640, 480))
-				.setCamera(hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1"))
-				.enableLiveView(true)
-				.build();
-
+		visionPortal = initVision();
 
 		// Start the live camera stream to the Driver Station preview window
-
-
-		//this is where you add all of the locations for the robot to go to
 
 
 		currentPose.init(robot, initPositions[0], initPositions[1], initPositions[2]);
@@ -207,8 +165,8 @@ public class DriveRed extends OpMode {
 	public void loop() {
 		telemetry.clear();
 		//current blob telemetry is commented out
-		handleBlobs();
-		detections = aprilTag.getDetections();
+		distanceFromBlob = handleBlobs();
+		detections = getTagDetections();
 		numDetections = detections.size();
 		telemetry.clear();
 
@@ -357,7 +315,7 @@ public class DriveRed extends OpMode {
 			//Pose2D pos = getRelativeDiff(new Pose2D(DistanceUnit.INCH, 40, 40, AngleUnit.RADIANS, 0));
 			//relativePosToTarget = pos;
 			//NewPositionOfRobot pose = new NewPositionOfRobot(pos.getX(DistanceUnit.INCH), pos.getY(DistanceUnit.INCH), pos.getHeading(AngleUnit.RADIANS));
-			startAutoMove(new NewPositionOfRobot(0, 40, 0));
+			startAutoMove(new NewPositionOfRobot(0, 0, 0));
 		}
 
 		if (gamepad1.b) {
@@ -452,65 +410,6 @@ public class DriveRed extends OpMode {
 	}
 
 	/**
-	 * if you want to use color blobs,
-	 * the fields from the currentBlob and circle fit,
-	 * also the distance from blob variable too
-	 */
-	public void handleBlobs() {
-		updateBlobs();
-
-		//telemetry.addLine("Circularity Radius Center");
-
-		double ARTIFACT_REAL_WIDTH_CM = 12.7;
-		double FOCAL_LENGTH_IN_PIXELS = 424.4;
-
-		// Display the Blob's circularity, and the size (radius) and center location of its circleFit.
-		for (ColorBlobLocatorProcessor.Blob b : blobs) {
-			currentBlob = b;
-			circleFit = currentBlob.getCircle();
-			//telemetry.addLine("HELLLLLLLLLLOOOOOOO " + String.format("%5.3f      %3d     (%3d,%3d)",
-			//currentBlob.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
-
-			if (!blobs.isEmpty()) {
-				// Assuming you care about the largest blob
-				ColorBlobLocatorProcessor.Blob largestBlob = blobs.get(0);
-
-				// Get the width of the bounding box around the blob in pixels
-				double pixelWidth = 2 * circleFit.getRadius();
-
-				// Calculate the distance
-				distanceFromBlob = 0.9 * (ARTIFACT_REAL_WIDTH_CM * FOCAL_LENGTH_IN_PIXELS) / pixelWidth;
-
-				// the multiplier 0.9 is used to calibrate the distance. could use some fine tuning
-				// Send the information to the Driver Station
-				//telemetry.addData("Distance to Artifact", "%.2f cm", distanceFromBlob);
-
-				//telemetry.addLine("HELLLLLLLLLLOOOOOOO " + String.format("%5.3f      %3d     (%3d,%3d)",
-				//       currentBlob.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
-				//telemetry.addData("Path", "Complete");
-			}
-		}
-
-	}
-
-	public void updateBlobs() {
-		blobs = colorLocatorPurple.getBlobs();
-
-		blobs.addAll(colorLocatorGreen.getBlobs());
-
-		ColorBlobLocatorProcessor.Util.filterByCriteria(
-				ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
-				50, 20000, blobs);  // filter out very small blobs.
-
-		ColorBlobLocatorProcessor.Util.filterByCriteria(
-				ColorBlobLocatorProcessor.BlobCriteria.BY_CIRCULARITY, 0.6, 1, blobs);
-
-		if (!blobs.isEmpty()) {
-			currentBlob = blobs.get(0);
-		}
-	}
-
-	/**
 	 * this method handles headless math and controls robot
 	 */
 	public void manualHeadlessDrive() {
@@ -555,44 +454,27 @@ public class DriveRed extends OpMode {
 		robot.BRdrive.setPower(y - rx + x);
 	}
 
-	/**
-	 * rotates coordinates by theta
-	 *
-	 * @param x
-	 * @param y
-	 * @param theta     degrees
-	 * @param isDegrees
-	 * @return double array with {x, y}
-	 */
-	public double[] rotateCord(double x, double y, double theta, boolean isDegrees) {
-		double[] cords = {0, 0};
-		if (isDegrees) {
-			theta = Math.toRadians(theta);
-		}
-		cords[0] = x * Math.cos(theta) - y * Math.sin(theta);
-		cords[1] = x * Math.sin(theta) - y * Math.cos(theta);
-		return cords;
-	}
-
 
 	public void startAutoMove(NewPositionOfRobot target) {
 		isMovingToSetPos = true;
 		currentTarget = target;
 	}
 
-	public void updateAutoDrive() {
+	public boolean updateAutoDrive() {
 		SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
 		currentPose.updateRealRobotPositions(pos);
 
-		double error = currentPose.moveToSetPosition(currentTarget);
-
+		double error = currentPose.moveToSetPosition(currentTarget, robot);
+		cError = error;
 		// telemetry.addData("AutoMoving", true);
 
 		// telemetry.addData("Error", error);
 
 		if (Math.abs(error) < cTreshold) {
 			stopAutoMove();
+			return false;
 		}
+		return true;
 	}
 
 	public void stopAutoMove() {
@@ -698,181 +580,6 @@ public class DriveRed extends OpMode {
 		}
 
 		return diff;
-	}
-
-
-	/**
-	 * Represents the new position and rotation of the robot.
-	 */
-	public class NewPositionOfRobot {
-		boolean justDrive;
-		double newx, newy;
-		double newRotation;
-		double speed = .3;
-
-		/**
-		 * Sets the robot's future position and rotation.
-		 *
-		 * @param nx     The new x-coordinate.
-		 * @param ny     The new y-coordinate.
-		 * @param newRot The new rotation angle.
-		 */
-		NewPositionOfRobot(double nx, double ny, double newRot) {
-			this.newx = nx;
-			this.newy = ny;
-			this.newRotation = newRot;
-			justDrive = true;
-		}
-
-		NewPositionOfRobot(double nx, double ny, double newRot, double setspeed) {
-			this.newx = nx;
-			this.newy = ny;
-			this.newRotation = newRot;
-			this.speed = setspeed;
-			justDrive = true;
-		}
-
-	}
-
-	public class CurrentRobotPose {
-		HardwareSoftware robotHardwaremap;
-		double realRobotX, realRobotY, realRobotHeading;
-		double gyX, gyY, gyR;
-
-		double initX, initY, initZ;
-
-		/**
-		 * Initializes the robot's pose.
-		 *
-		 * @param hwMap The hardware map.
-		 * @param inX   The initial x-coordinate.
-		 * @param inY   The initial y-coordinate.
-		 * @param inz   The initial z-coordinate.
-		 */
-		public void init(HardwareSoftware hwMap, double inX, double inY, double inz) {
-			this.robotHardwaremap = hwMap;
-			this.initX = inX;
-			this.initY = inY;
-			this.initZ = inz;
-		}
-
-		/**
-		 * Updates the robot's real positions based on gyroscope values.
-		 *
-		 * @param gyroValue The current gyroscope position.
-		 */
-		public void updateRealRobotPositions(SparkFunOTOS.Pose2D gyroValue) {
-			gyX = gyroValue.x;
-			gyY = gyroValue.y;
-			gyR = gyroValue.h;
-
-			realRobotX = initX + gyX;
-			realRobotY = initY + gyY;
-			realRobotHeading = initZ + normalizeAngle(gyR);
-		}
-
-		/**
-		 * Moves the robot to a set position and returns the current error.
-		 *
-		 * @param setPose The target position and rotation.
-		 * @return The current error between the robot's position and the target position.
-		 */
-		double moveToSetPosition(DriveRed.NewPositionOfRobot setPose) {
-			double currentError = 0;
-			double powY, powX, rx = 0;
-			double powdY, powdX;
-
-			powdX = setPose.newx - realRobotX;
-			powdY = setPose.newy - realRobotY;
-
-			if (powdX > 3 || powdX < -3) {
-				powX = Math.signum(powdX);
-			} else {
-				powX = powdX / 3;
-			}
-
-			if (powdY > 3 || powdY < -3) {
-				powY = Math.signum(powdY);
-			} else {
-				powY = powdY / 3;
-			}
-
-			double[] altAngles = new double[3];
-			double[] diffAngles = new double[3];
-
-			altAngles[0] = setPose.newRotation - 2 * Math.PI;
-			altAngles[1] = setPose.newRotation;
-			altAngles[2] = setPose.newRotation + 2 * Math.PI;
-
-			for (int i = 0; i < 3; ++i) {
-				diffAngles[i] = altAngles[i] - realRobotHeading;
-			}
-
-			Arrays.sort(diffAngles);
-
-			int goodindex = 0;
-
-			if (Math.abs(diffAngles[1]) < Math.abs(diffAngles[0])) {
-				goodindex = 1;
-			}
-			if (Math.abs(diffAngles[2]) < Math.abs(diffAngles[0])) {
-				goodindex = 2;
-			}
-			if (Math.abs(diffAngles[2]) < Math.abs(diffAngles[1])) {
-				goodindex = 2;
-			}
-			if (Math.abs(diffAngles[1]) < Math.abs(diffAngles[2])) {
-				goodindex = 1;
-			}
-
-			rx = diffAngles[goodindex];
-
-//            telemetry.addData("diffIn0", diffAngles[0]);
-//            telemetry.addData("diffIn1", diffAngles[1]);
-//            telemetry.addData("diffIn2", diffAngles[2]);
-
-
-			double dx = setPose.newx - realRobotX;
-			double dy = setPose.newy - realRobotY;
-
-			double botHeading = -realRobotHeading;
-			double realSetX = dx * cos(botHeading) - dy * sin(botHeading);
-			double realSetY = dx * sin(botHeading) + dy * cos(botHeading);
-
-//            telemetry.addData("powx", powX);
-//            telemetry.addData("powy", powY);
-//            telemetry.addData("realSetX", realSetX);
-//            telemetry.addData("realSetY", realSetY);
-//            telemetry.addData("rx", rx);
-
-			//basically just does headless until it gets to the right position
-			double denominator = Math.max(Math.abs(powY) + Math.abs(powX) + Math.abs(rx), 1);
-
-			robot.FLdrive.setPower(((-realSetY - realSetX - rx) / denominator) * setPose.speed);
-			robot.BLdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
-			robot.FRdrive.setPower(((-realSetY + realSetX + rx) / denominator) * setPose.speed);
-			robot.BRdrive.setPower(((-realSetY - realSetX + rx) / denominator) * setPose.speed);
-			cX = Math.abs(dx);
-			cY = Math.abs(dy);
-			cH = Math.abs(rx);
-			currentError = cX + cY + cH;
-			cError = currentError;
-			return currentError;
-		}
-
-	}
-
-	/**
-	 * normalizes an angle - because it is cyclical, keeps it in range of (0, 2pi)
-	 */
-	public static double normalizeAngle(double angle) {
-		while (angle < 0) {
-			angle += 2 * Math.PI;
-		}
-		while (angle >= 2 * Math.PI) {
-			angle -= 2 * Math.PI;
-		}
-		return angle;
 	}
 
 	public String pose2DtoString(Pose2D pos) {
