@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CameraSensor {
+	//class to handle all camera detection logic,
+	// uses logitech camera
 
 	static ColorBlobLocatorProcessor colorLocatorPurple = null;
 

@@ -17,7 +17,9 @@ public class HelperMethods {
 
 
 	/**
-	 * rotates coordinates by theta
+	 * rotates coordinates by theta.
+	 * if you imagine a circle around 0, 0,
+	 * and these cordinates on that circle, it will rotate them by theta degrees
 	 *
 	 * @param x
 	 * @param y
