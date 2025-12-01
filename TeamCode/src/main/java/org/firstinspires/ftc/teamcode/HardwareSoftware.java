@@ -8,6 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 public class HardwareSoftware {
 
     private HardwareMap hw = null;
@@ -31,7 +34,10 @@ public class HardwareSoftware {
 
     public SparkFunOTOS gyro;
 
-
+    /**
+     * initializes the motors and servos
+     * @param ahw
+     */
     public void init(HardwareMap ahw) {
 
         hw = ahw;
@@ -61,32 +67,10 @@ public class HardwareSoftware {
 
         flyWheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        /*
-        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        flyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-
-
-        flyWheel.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        flyWheel.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-
-        intake.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        intake.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-         */
-
-        //old robots set up
-//        FLdrive.setDirection(DcMotorEx.Direction.REVERSE);
-//        BLdrive.setDirection(DcMotorEx.Direction.FORWARD);
-//        FRdrive.setDirection(DcMotorEx.Direction.REVERSE);
-//        BRdrive.setDirection(DcMotorEx.Direction.FORWARD);
 
         flyWheelRotator2.setDirection(Servo.Direction.REVERSE);
         flyWheelRotator1.setDirection(Servo.Direction.FORWARD);
 
-
-        //new robot setup
         FLdrive.setDirection(DcMotorEx.Direction.REVERSE);
         BLdrive.setDirection(DcMotorEx.Direction.REVERSE);
         FRdrive.setDirection(DcMotorEx.Direction.FORWARD);
@@ -98,6 +82,49 @@ public class HardwareSoftware {
         BLdrive.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
 
+    }
+
+    /**
+     * initialize the gyro stuff
+     */
+    public void initGyro() {
+        gyro.calibrateImu();
+        gyro.resetTracking();
+
+        gyro.setLinearUnit(DistanceUnit.INCH);
+        gyro.setAngularUnit(AngleUnit.RADIANS);
+
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
+        gyro.setOffset(offset);
+        gyro.setLinearScalar(1.0);
+        gyro.setAngularScalar(1.0);
+        gyro.calibrateImu();
+        gyro.resetTracking();
+        SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
+        gyro.setPosition(currentPosition);
+    }
+
+    /**
+     * initialize the gyro and add current spot on field to make the positions always the same
+     * @param x
+     * @param y
+     * @param h
+     */
+    public void initGyro(double x, double y, double h) {
+        gyro.calibrateImu();
+        gyro.resetTracking();
+
+        gyro.setLinearUnit(DistanceUnit.INCH);
+        gyro.setAngularUnit(AngleUnit.RADIANS);
+
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
+        gyro.setOffset(offset);
+        gyro.setLinearScalar(1.0);
+        gyro.setAngularScalar(1.0);
+        gyro.calibrateImu();
+        gyro.resetTracking();
+        SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(x, y, h);
+        gyro.setPosition(currentPosition);
     }
 
 }

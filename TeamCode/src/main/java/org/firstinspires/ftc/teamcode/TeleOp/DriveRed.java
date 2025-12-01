@@ -121,30 +121,13 @@ public class DriveRed extends OpMode {
 	// WIP: know where it is and where its gyro-origin is
 	// WIP: go to an absolute position on the field
 
-	public void initGyro() {
-		robot.gyro.calibrateImu();
-		robot.gyro.resetTracking();
-
-		robot.gyro.setLinearUnit(DistanceUnit.INCH);
-		robot.gyro.setAngularUnit(AngleUnit.RADIANS);
-
-		SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
-		robot.gyro.setOffset(offset);
-		robot.gyro.setLinearScalar(1.0);
-		robot.gyro.setAngularScalar(1.0);
-		robot.gyro.calibrateImu();
-		robot.gyro.resetTracking();
-		SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
-		robot.gyro.setPosition(currentPosition);
-	}
 
 	@Override
 	public void init() {
 
 		robot.init(hardwareMap);
 
-		initGyro();
-
+		robot.initGyro();
 
 		visionPortal = initVision();
 

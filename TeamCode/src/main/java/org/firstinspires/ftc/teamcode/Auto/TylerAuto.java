@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
+import static org.firstinspires.ftc.teamcode.HelperMethods.normalizeAngle;
+import static org.firstinspires.ftc.teamcode.subsystems.CameraSensor.initVision;
+
 import android.util.Size;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -15,6 +18,8 @@ import org.firstinspires.ftc.teamcode.HardwareSoftware;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
+import org.firstinspires.ftc.teamcode.subsystems.Drive.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,49 +77,26 @@ public class TylerAuto extends LinearOpMode {
 
 		robot.init(hardwareMap);
 
-		robot.gyro.setLinearUnit(DistanceUnit.INCH);
-		robot.gyro.setAngularUnit(AngleUnit.RADIANS);
-		SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
-		robot.gyro.setOffset(offset);
-		robot.gyro.setLinearScalar(1.0);
-		robot.gyro.setAngularScalar(1.0);
-		robot.gyro.calibrateImu();
-		robot.gyro.resetTracking();
-		//could use this to make it so every auto uses the same cordinate system, not relative
-		SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
-		robot.gyro.setPosition(currentPosition);
-		robot.gyro.resetTracking();
+
+        robot.initGyro();
 
 
-		aprilTag = new AprilTagProcessor.Builder()
-				.setDrawAxes(true)
-				.setDrawCubeProjection(true)
-				.setDrawTagOutline(true)
-				.build();
-
-
-		visionPortal = new VisionPortal.Builder()
-				.addProcessor(aprilTag)
-				.setCameraResolution(new Size(640, 480))
-				.setCamera(hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1"))
-				.enableLiveView(true)
-				.build();
+        visionPortal = initVision();
 
 		//this is where you add all of the locations for the robot to go to
 
 
-		robotPoses.add(new NewPositionOfRobot(0, -5, 0));
-		robotPoses.add(new NewPositionOfRobot(5, -5, 0));
-		robotPoses.add(new NewPositionOfRobot(5, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+		robotPoses.add(new NewPositionOfRobot(0, -20, 0));
+		robotPoses.add(new NewPositionOfRobot(20, -20, 0));
+		robotPoses.add(new NewPositionOfRobot(20, 0, 0));
+		robotPoses.add(new NewPositionOfRobot(10, 0, 0));
+		robotPoses.add(new NewPositionOfRobot(10, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(10, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(10, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(10, 0, 0));
+        robotPoses.add(new NewPositionOfRobot(10, 0, 0));
+
+
 
 
 //        robotPoses.add(new NewPositionOfRobot(0, 5, Math.PI / 2.0));
@@ -182,7 +164,10 @@ public class TylerAuto extends LinearOpMode {
 
 			currentPose.updateRealRobotPositions(pos);
 
-			cerror = currentPose.moveToSetPosition(robotPoses.get(currentInstruction));
+			cerror = currentPose.moveToSetPosition(robotPoses.get(currentInstruction), robot);
+            cX = currentPose.cDx;
+            cY = currentPose.cDy;
+            cH = currentPose.cDh;
 
 			telemetry.addData("cerror", cerror);
 
@@ -196,7 +181,7 @@ public class TylerAuto extends LinearOpMode {
 			switch (currentInstruction) {
 				case 0: {
 
-					if (caseStopwatch.seconds() < 2) {
+					if (caseStopwatch.seconds() < 10) {
 						isOkToMoveOn = false;
 					} else {
 						isOkToMoveOn = true;
@@ -241,173 +226,7 @@ public class TylerAuto extends LinearOpMode {
 	}
 
 
-	/**
-	 * Represents the new position and rotation of the robot.
-	 */
-	public class NewPositionOfRobot {
-		boolean justDrive;
-		double newx, newy;
-		double newRotation;
-		double speed = .4;
 
-		/**
-		 * Sets the robot's future position and rotation.
-		 *
-		 * @param nx     The new x-coordinate.
-		 * @param ny     The new y-coordinate.
-		 * @param newRot The new rotation angle.
-		 */
-		NewPositionOfRobot(double nx, double ny, double newRot) {
-			this.newx = nx;
-			this.newy = ny;
-			this.newRotation = newRot;
-			justDrive = true;
-		}
-
-		NewPositionOfRobot(double nx, double ny, double newRot, double setspeed) {
-			this.newx = nx;
-			this.newy = ny;
-			this.newRotation = newRot;
-			this.speed = setspeed;
-			justDrive = true;
-		}
-
-	}
-
-	public class CurrentRobotPose {
-		HardwareSoftware robotHardwaremap;
-		double realRobotX, realRobotY, realRobotHeading;
-		double gyX, gyY, gyR;
-
-		double initX, initY, initZ;
-
-		/**
-		 * Initializes the robot's pose.
-		 *
-		 * @param hwMap The hardware map.
-		 * @param inX   The initial x-coordinate.
-		 * @param inY   The initial y-coordinate.
-		 * @param inz   The initial z-coordinate.
-		 */
-		public void init(HardwareSoftware hwMap, double inX, double inY, double inz) {
-			this.robotHardwaremap = hwMap;
-			this.initX = inX;
-			this.initY = inY;
-			this.initZ = inz;
-		}
-
-		/**
-		 * Updates the robot's real positions based on gyroscope values.
-		 *
-		 * @param gyroValue The current gyroscope position.
-		 */
-		public void updateRealRobotPositions(SparkFunOTOS.Pose2D gyroValue) {
-			gyX = gyroValue.x;
-			gyY = gyroValue.y;
-			gyR = gyroValue.h;
-
-			realRobotX = initX + gyX;
-			realRobotY = initY + gyY;
-			realRobotHeading = initZ + normalizeAngle(-gyR);
-		}
-
-		/**
-		 * Moves the robot to a set position and returns the current error.
-		 *
-		 * @param setPose The target position and rotation.
-		 * @return The current error between the robot's position and the target position.
-		 */
-		double moveToSetPosition(NewPositionOfRobot setPose) {
-			double currentError = 0;
-			double powY, powX, rx = 0;
-			double powdY, powdX;
-
-			powdX = setPose.newx - realRobotX;
-			powdY = setPose.newy - realRobotY;
-
-			if (powdX > 3 || powdX < -3) {
-				powX = Math.signum(powdX);
-			} else {
-				powX = powdX / 3;
-			}
-
-			if (powdY > 3 || powdY < -3) {
-				powY = Math.signum(powdY);
-			} else {
-				powY = powdY / 3;
-			}
-
-			double[] altAngles = new double[3];
-			double[] diffAngles = new double[3];
-
-			altAngles[0] = setPose.newRotation - 2 * Math.PI;
-			altAngles[1] = setPose.newRotation;
-			altAngles[2] = setPose.newRotation + 2 * Math.PI;
-
-			for (int i = 0; i < 3; ++i) {
-				diffAngles[i] = altAngles[i] - realRobotHeading;
-			}
-
-			Arrays.sort(diffAngles);
-
-			int goodindex = 0;
-
-			if (Math.abs(diffAngles[1]) < Math.abs(diffAngles[0])) {
-				goodindex = 1;
-			}
-			if (Math.abs(diffAngles[2]) < Math.abs(diffAngles[0])) {
-				goodindex = 2;
-			}
-			if (Math.abs(diffAngles[2]) < Math.abs(diffAngles[1])) {
-				goodindex = 2;
-			}
-			if (Math.abs(diffAngles[1]) < Math.abs(diffAngles[2])) {
-				goodindex = 1;
-			}
-
-			rx = diffAngles[goodindex];
-
-			telemetry.addData("diffIn0", diffAngles[0]);
-			telemetry.addData("diffIn1", diffAngles[1]);
-			telemetry.addData("diffIn2", diffAngles[2]);
-
-
-			double realSetX = powX * Math.cos(-realRobotHeading) - powY * Math.sin(-realRobotHeading);
-			double realSetY = powX * Math.sin(-realRobotHeading) + powY * Math.cos(-realRobotHeading);
-
-			telemetry.addData("powx", powX);
-			telemetry.addData("powy", powY);
-			telemetry.addData("realSetX", realSetX);
-			telemetry.addData("realSetY", realSetY);
-			telemetry.addData("rx", rx);
-
-
-			double denominator = Math.max(Math.abs(powY) + Math.abs(powX) + Math.abs(rx), 1);
-
-			robot.FLdrive.setPower(((-realSetY - realSetX + rx) / denominator) * setPose.speed);
-			robot.BLdrive.setPower(((-realSetY + realSetX + rx) / denominator) * setPose.speed);
-			robot.FRdrive.setPower(((-realSetY - realSetX - rx) / denominator) * setPose.speed);
-			robot.BRdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
-
-			cX = Math.abs(powdX);
-			cY = Math.abs(powdY);
-			cH = Math.abs(rx);
-			currentError = cX + cY + cH;
-
-			return currentError;
-		}
-
-	}
-
-	public static double normalizeAngle(double angle) {
-		while (angle < 0) {
-			angle += 2 * Math.PI;
-		}
-		while (angle >= 2 * Math.PI) {
-			angle -= 2 * Math.PI;
-		}
-		return angle;
-	}
 
 	public void shootPurple() {
 
