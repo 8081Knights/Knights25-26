@@ -10,6 +10,8 @@ import org.firstinspires.ftc.teamcode.HardwareSoftware;
 import java.util.Arrays;
 
 public class Drive {
+
+
 	//should contain all of the drive related code, eg: headless, mechanum, go to position
 	//would make the subsystems folder cleaner and make more sense at a glance
 
@@ -21,7 +23,7 @@ public class Drive {
 		public boolean justDrive;
 		public double newx, newy;
 		public double newRotation;
-		public double speed = .3;
+		public double speed = .6;
 
 		/**
 		 * Sets the robot's future position and rotation.
@@ -52,6 +54,10 @@ public class Drive {
 		HardwareSoftware robotHardwaremap;
 		public double realRobotX, realRobotY, realRobotHeading;
 		public double gyX, gyY, gyR;
+
+		public  double cDx = 0;
+		public  double cDy = 0;
+		public  double cDh = 0;
 
 		public double initX, initY, initZ;
 
@@ -148,10 +154,12 @@ public class Drive {
 
 			double dx = setPose.newx - realRobotX;
 			double dy = setPose.newy - realRobotY;
+			//dy and dx are basically powx and powy, but not changed some, might want to revert back to the pow stuff fully
+			//seems to be messing with the pid tuning, not as accurate
 
 			double botHeading = -realRobotHeading;
-			double realSetX = dx * cos(botHeading) - dy * sin(botHeading);
-			double realSetY = dx * sin(botHeading) + dy * cos(botHeading);
+			double realSetX = powX * cos(botHeading) - powY * sin(botHeading);
+			double realSetY = powX * sin(botHeading) + powY * cos(botHeading);
 
 //            telemetry.addData("powx", powX);
 //            telemetry.addData("powy", powY);
@@ -166,7 +174,10 @@ public class Drive {
 			robot.BLdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
 			robot.FRdrive.setPower(((-realSetY + realSetX + rx) / denominator) * setPose.speed);
 			robot.BRdrive.setPower(((-realSetY - realSetX + rx) / denominator) * setPose.speed);
-			currentError = Math.abs(dx) + Math.abs(dy) + Math.abs(rx);
+			cDx = Math.abs(powX);
+			cDy = Math.abs(powY);
+			cDh = Math.abs(rx);
+			currentError = cDx + cDy + cDh;
 			return currentError;
 		}
 
