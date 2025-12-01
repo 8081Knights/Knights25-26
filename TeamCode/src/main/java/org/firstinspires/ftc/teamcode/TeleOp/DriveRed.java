@@ -5,28 +5,19 @@ import static org.firstinspires.ftc.teamcode.subsystems.CameraSensor.*;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
-import android.graphics.Color;
-import android.util.Size;
-
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
-import org.firstinspires.ftc.teamcode.subsystems.CurrentRobotPose;
+import org.firstinspires.ftc.robotcore.external.navigation.*;
+import org.firstinspires.ftc.teamcode.subsystems.Drive.*;
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
-import org.firstinspires.ftc.teamcode.subsystems.NewPositionOfRobot;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.opencv.Circle;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
-import org.firstinspires.ftc.vision.opencv.ColorRange;
-import org.firstinspires.ftc.vision.opencv.ImageRegion;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -34,6 +25,12 @@ import java.util.List;
 
 @TeleOp(name = "DriveRed")
 public class DriveRed extends OpMode {
+	//current teleop for matches, both colors
+	//MATCHES
+	//TODO: need to do auto for this comp
+	// then after that get the hooded shooter and turntable to work
+	// then make sure the other code(turn and go to ball, shooting autonomously, drive stuff)
+	// are all standard and implemented properly
 	HardwareSoftware robot = new HardwareSoftware();
 
 	double[] initPositions = {0, 0, 0};
@@ -118,10 +115,11 @@ public class DriveRed extends OpMode {
 
 
 	//this is the red teleop code
-	// it can detect balls by color
-	// use april tags
-	// know where it is and where its gyro-origin is
-	// go to an absolute position on the field
+	// it can detect balls by color,
+	// use april tags,
+	// go to relative position on field based on gyro-origin
+	// WIP: know where it is and where its gyro-origin is
+	// WIP: go to an absolute position on the field
 
 	public void initGyro() {
 		robot.gyro.calibrateImu();
@@ -158,13 +156,9 @@ public class DriveRed extends OpMode {
 
 	}
 
-	//TODO: find out if the april tag math works,
-	// make sure that the position of the robot is actually changing how i think it is
-
 	@Override
 	public void loop() {
 		telemetry.clear();
-		//current blob telemetry is commented out
 		distanceFromBlob = handleBlobs();
 		detections = getTagDetections();
 		numDetections = detections.size();
@@ -293,6 +287,7 @@ public class DriveRed extends OpMode {
 				telemetry.addData("gyroOriginX: ", gxField);
 				telemetry.addData("gyroOriginY: ", gyField);
 
+				//if motif tag
 			} else {
 				for (int i = 0; i < 3; i++) {
 					if (det.id == motifTagIds[i]) {
