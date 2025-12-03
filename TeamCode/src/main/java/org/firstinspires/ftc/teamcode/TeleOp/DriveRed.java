@@ -70,7 +70,7 @@ public class DriveRed extends OpMode {
 
 	double distanceFromBlob;
 
-	double farShootingPos = 0.45;
+	double farShootingPos = 0.25;
 
 	double closeShootingPos = 0.5;
 
@@ -383,7 +383,7 @@ public class DriveRed extends OpMode {
 		if (gamepad1.left_bumper) {
 			targetFlyWheelVelo = -700;
 		} else if (gamepad1.right_bumper) {
-			targetFlyWheelVelo = -2000;
+			targetFlyWheelVelo = -1800;
 		} else {
 			targetFlyWheelVelo = 0;
 		}
@@ -403,18 +403,27 @@ public class DriveRed extends OpMode {
 			//telemetry.addData("b is pressed", "");
 			//more neg is higher
 			//more pos is lower
-			robot.flyWheelRotator1.setPosition(farShootingPos - 0.15);
-			robot.flyWheelRotator2.setPosition(farShootingPos - 0.15);
+			robot.flyWheelRotator1.setPosition(0.6);
+			robot.flyWheelRotator2.setPosition(0.6);
 		} else if (gamepad2.y) {
 			//telemetry.addData("y is pressed", "");
-			robot.flyWheelRotator1.setPosition(farShootingPos - 0.1);
-			robot.flyWheelRotator2.setPosition(farShootingPos - 0.1);
+			robot.flyWheelRotator1.setPosition(farShootingPos);
+			robot.flyWheelRotator2.setPosition(farShootingPos);
+		} else if(gamepad2.x){
+		}
+
+		if(gamepad2.dpad_up){
+			farShootingPos += 0.01;
+		} else if (gamepad2.dpad_down) {
+			farShootingPos -= 0.01;
 		}
 
 
 
+
+
 		telemetry.addData("flyWheelPos1:", robot.flyWheelRotator1.getPosition());
-		// telemetry.addData("flyWheelPos2:", robot.flyWheelRotator2.getPosition());
+		 telemetry.addData("varPos:", farShootingPos);
 
 		telemetry.addData("cError", cError);
 		telemetry.addData("cX", cX);
@@ -436,12 +445,12 @@ public class DriveRed extends OpMode {
 		//can just toggle between these two positions
 
 		if (gamepad2.dpad_right) {
-			robot.sorterServo.setPosition(0.4);
+			robot.sorterServo.setPosition(0.1);
 			//  telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
 		}
 
 		if (gamepad2.dpad_left) {
-			robot.sorterServo.setPosition(0.8);
+			robot.sorterServo.setPosition(0.6);
 			// telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
 		}
 
@@ -466,10 +475,10 @@ public class DriveRed extends OpMode {
 		double rotY = rotCords[1];
 
 		double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-		robot.FLdrive.setPower(((rotY + rotX + rx) / denominator));
-		robot.BLdrive.setPower(((rotY - rotX + rx) / denominator));
-		robot.FRdrive.setPower(((rotY - rotX - rx) / denominator));
-		robot.BRdrive.setPower(((rotY + rotX - rx) / denominator));
+		robot.FLdrive.setPower(((rotY - rotX + rx) / denominator));
+		robot.BLdrive.setPower(((rotY + rotX + rx) / denominator));
+		robot.FRdrive.setPower(((rotY + rotX - rx) / denominator));
+		robot.BRdrive.setPower(((rotY - rotX - rx) / denominator));
 	}
 
 	public void manualMechanumDrive() {

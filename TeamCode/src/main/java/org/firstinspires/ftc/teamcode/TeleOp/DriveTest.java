@@ -17,10 +17,10 @@ public class DriveTest extends OpMode {
 
 	public void loop() {
 		if (gamepad1.x) {
-			robot.BLdrive.setPower(0.3);
-			robot.FLdrive.setPower(0.3);
-			robot.BRdrive.setPower(0.3);
-			robot.FRdrive.setPower(0.3);
+			robot.BLdrive.setPower(0.6);
+			robot.FLdrive.setPower(0.6);
+			robot.BRdrive.setPower(0.6);
+			robot.FRdrive.setPower(0.6);
 		}
 
 		if (gamepad1.a) {
