@@ -17,6 +17,14 @@ public class HoodedTest extends OpMode {
 
     @Override
     public void loop() {
+
+        if(gamepad1.x){
+            robot.intake.setPower(0.5);
+            telemetry.addData("HI treyton", "JO momma");
+        } else {
+            robot.intake.setPower(0);
+        }
+
         if(gamepad1.right_trigger > 0.5){
             robot.flyWheel.setPower(0.7);
         } else {

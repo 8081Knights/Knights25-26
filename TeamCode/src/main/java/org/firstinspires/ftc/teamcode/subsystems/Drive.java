@@ -23,7 +23,7 @@ public class Drive {
 		public boolean justDrive;
 		public double newx, newy;
 		public double newRotation;
-		public double speed = .6;
+		public double speed = .9;
 
 		/**
 		 * Sets the robot's future position and rotation.

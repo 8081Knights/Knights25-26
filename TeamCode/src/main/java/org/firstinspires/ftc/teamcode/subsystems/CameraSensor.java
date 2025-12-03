@@ -5,6 +5,10 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.har
 import android.graphics.Color;
 import android.util.Size;
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.HardwareSoftware;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -21,11 +25,11 @@ public class CameraSensor {
 	//class to handle all camera detection logic,
 	// uses logitech camera
 
-	static ColorBlobLocatorProcessor colorLocatorPurple = null;
+	private ColorBlobLocatorProcessor colorLocatorPurple = null;
 
-	static ColorBlobLocatorProcessor colorLocatorGreen = null;
+	private ColorBlobLocatorProcessor colorLocatorGreen = null;
 
-	static AprilTagProcessor aprilTag;
+	private AprilTagProcessor aprilTag;
 	static ArrayList<VisionProcessor> processors = new ArrayList<>();
 
 	static List<ColorBlobLocatorProcessor.Blob> blobs = null;
@@ -33,12 +37,18 @@ public class CameraSensor {
 	static Circle circleFit = null;
 	static ColorBlobLocatorProcessor.Blob currentBlob = null;
 
+	static HardwareSoftware robot;
 
-	public static ArrayList<AprilTagDetection> getTagDetections() {
+
+
+
+	public ArrayList<AprilTagDetection> getTagDetections() {
 		return aprilTag.getDetections();
 	}
 
-	public static VisionPortal initVision() {
+	public VisionPortal initVision() {
+		processors.clear();
+
 		aprilTag = initTagProcessor();
 		colorLocatorGreen = initGreenLocator();
 		colorLocatorPurple = initPurpleLocator();
@@ -86,13 +96,14 @@ public class CameraSensor {
 	}
 
 	public static VisionPortal initVisionProcessor(ArrayList<VisionProcessor> list) {
+		WebcamName cam = hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1");
 		VisionPortal.Builder o = new VisionPortal.Builder();
-		for (VisionProcessor processor : list) {
-			o.addProcessor(processor);
-		}
-		o.setCameraResolution(new Size(640, 480))
-				.setCamera(hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1"))
-				.enableLiveView(true);
+		o.setCamera(cam);
+
+			for (VisionProcessor processor : list) {
+				o.addProcessor(processor);
+			}
+
 
 		return o.build();
 	}
@@ -110,7 +121,7 @@ public class CameraSensor {
 	 * the fields from the currentBlob and circle fit,
 	 * also the distance from blob variable too
 	 */
-	public static double handleBlobs() {
+	public double handleBlobs() {
 		updateBlobs();
 		return getClosestDistance();
 	}
@@ -157,7 +168,7 @@ public class CameraSensor {
 	}
 
 
-	public static void updateBlobs() {
+	public void updateBlobs() {
 		blobs = colorLocatorPurple.getBlobs();
 
 		blobs.addAll(colorLocatorGreen.getBlobs());

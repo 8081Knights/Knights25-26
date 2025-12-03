@@ -1,6 +1,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -8,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
@@ -34,6 +37,10 @@ public class HardwareSoftware {
 
     public SparkFunOTOS gyro;
 
+   // public WebcamName camera;
+
+
+
     /**
      * initializes the motors and servos
      * @param ahw
@@ -58,6 +65,8 @@ public class HardwareSoftware {
         flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
 
         gyro = hw.get(SparkFunOTOS.class, "gyro");
+
+       // camera = hw.get(WebcamName.class, "Webcam777");
 
 
         FLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);

@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.Auto;
 
 import static org.firstinspires.ftc.teamcode.HelperMethods.normalizeAngle;
-import static org.firstinspires.ftc.teamcode.subsystems.CameraSensor.initVision;
 
+import android.graphics.Color;
 import android.util.Size;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
@@ -15,11 +15,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
 
+import org.firstinspires.ftc.teamcode.subsystems.CameraSensor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import org.firstinspires.ftc.teamcode.subsystems.Drive.*;
+import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
+import org.firstinspires.ftc.vision.opencv.ColorRange;
+import org.firstinspires.ftc.vision.opencv.ImageRegion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +61,8 @@ public class TylerAuto extends LinearOpMode {
 
 	boolean isOkToMoveOn = false;
 
+	boolean hasTag = false;
+
 	ElapsedTime caseStopwatch = new ElapsedTime();
 
 	CurrentRobotPose currentPose = new CurrentRobotPose();
@@ -72,6 +78,10 @@ public class TylerAuto extends LinearOpMode {
 
 	double cTreshold = .5;
 
+	private ColorBlobLocatorProcessor colorLocatorPurple = null;
+
+	private ColorBlobLocatorProcessor colorLocatorGreen = null;
+
 
 	public void initThis() {
 
@@ -81,37 +91,74 @@ public class TylerAuto extends LinearOpMode {
         robot.initGyro();
 
 
-        visionPortal = initVision();
+        //visionPortal = camera.initVision();
 
 		//this is where you add all of the locations for the robot to go to
 
 
-		robotPoses.add(new NewPositionOfRobot(0, -20, 0));
-		robotPoses.add(new NewPositionOfRobot(20, -20, 0));
-		robotPoses.add(new NewPositionOfRobot(20, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(10, 0, 0));
-		robotPoses.add(new NewPositionOfRobot(10, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(10, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(10, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(10, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(10, 0, 0));
+		aprilTag = new AprilTagProcessor.Builder()
+				.setDrawAxes(true)
+				.setDrawCubeProjection(true)
+				.setDrawTagOutline(true)
+				.build();
+
+		colorLocatorGreen = new ColorBlobLocatorProcessor.Builder()
+				.setTargetColorRange(ColorRange.ARTIFACT_GREEN)   // Use a predefined color match
+				.setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+				.setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+				.setDrawContours(true)   // Show contours on the Stream Preview
+				.setBoxFitColor(0)       // Disable the drawing of rectangles
+				.setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
+				.setBlurSize(5)          // Smooth the transitions between different colors in image
+
+				// the following options have been added to fill in perimeter holes.
+				.setDilateSize(15)       // Expand blobs to fill any divots on the edges
+				.setErodeSize(15)        // Shrink blobs back to original size
+				.setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
+
+				.build();
+
+		colorLocatorPurple = new ColorBlobLocatorProcessor.Builder()
+				.setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
+				.setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+				.setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+				.setDrawContours(true)   // Show contours on the Stream Preview
+				.setBoxFitColor(0)       // Disable the drawing of rectangles
+				.setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
+				.setBlurSize(5)          // Smooth the transitions between different colors in image
+
+				// the following options have been added to fill in perimeter holes.
+				.setDilateSize(15)       // Expand blobs to fill any divots on the edges
+				.setErodeSize(15)        // Shrink blobs back to original size
+				.setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
+
+				.build();
+
+
+		VisionPortal.Builder o = new VisionPortal.Builder();
+		o.setCamera(hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1"));
+		o.addProcessor(aprilTag)
+				.addProcessor(colorLocatorGreen)
+				.addProcessor(colorLocatorPurple);
+
+		visionPortal = o.build();
 
 
 
 
-//        robotPoses.add(new NewPositionOfRobot(0, 5, Math.PI / 2.0));
-//        robotPoses.add(new NewPositionOfRobot(5, 5, Math.PI));
-//        robotPoses.add(new NewPositionOfRobot(5, 0, Math.PI * (3 / 2.0)));
-//        robotPoses.add(new NewPositionOfRobot(0, 0, 0));
+        //robotPoses.add(new NewPositionOfRobot(0, 20, 0));
+        //robotPoses.add(new NewPositionOfRobot(20, 20, 0));
+        //robotPoses.add(new NewPositionOfRobot(20, 0, 0));
+        //robotPoses.add(new NewPositionOfRobot(0, 0, 0));
 
-        /* //starting pos: next to the big tower where you shoot the balls
+        //starting pos: next to the big tower where you shoot the balls
         // see obelisk and shoot
-        robotPoses.add(new NewPositionOfRobot(30, 0, 0));
-        robotPoses.add(new NewPositionOfRobot(30, 0, -Math.PI*.5));
-
+        robotPoses.add(new NewPositionOfRobot(40, -20, 0));
+        robotPoses.add(new NewPositionOfRobot(40, 0, -Math.PI*.5));
+/*
         // go down, grab first pattern
-        robotPoses.add(new NewPositionOfRobot(30, 30, Math.PI*.75));
-        robotPoses.add(new NewPositionOfRobot(10, 30, Math.PI*.75));
+        robotPoses.add(new NewPositionOfRobot(30, -30, Math.PI*.75));
+        robotPoses.add(new NewPositionOfRobot(10, -30, Math.PI*.75));
 
         // shoot pattern
         robotPoses.add(new NewPositionOfRobot(30, 0, -Math.PI*.5));
@@ -143,15 +190,16 @@ public class TylerAuto extends LinearOpMode {
 
 	public void runOpMode() throws InterruptedException {
 
-		initThis();
+            initThis();
 
-		waitForStart();
+
+        waitForStart();
 
 
 		double cerror;
 
 
-		while (opModeIsActive() && !isStopRequested()) {
+		while (opModeIsActive() && !isStopRequested() && currentInstruction < robotPoses.size()) {
 			pos = robot.gyro.getPosition();
 			telemetry.addData("Posx", pos.x);
 			telemetry.addData("Posy", pos.y);
@@ -164,29 +212,29 @@ public class TylerAuto extends LinearOpMode {
 
 			currentPose.updateRealRobotPositions(pos);
 
-			cerror = currentPose.moveToSetPosition(robotPoses.get(currentInstruction), robot);
-            cX = currentPose.cDx;
-            cY = currentPose.cDy;
-            cH = currentPose.cDh;
+				cerror = currentPose.moveToSetPosition(robotPoses.get(currentInstruction), robot);
 
-			telemetry.addData("cerror", cerror);
+				cX = currentPose.cDx;
+				cY = currentPose.cDy;
+				cH = currentPose.cDh;
 
-			telemetry.addData("cX", cX);
-			telemetry.addData("cY", cY);
-			telemetry.addData("cH", cH);
+				telemetry.addData("cerror", cerror);
+
+				telemetry.addData("cX", cX);
+				telemetry.addData("cY", cY);
+				telemetry.addData("cH", cH);
 
 
-			//this is for the point scoring, not the wheels
+				//this is for the point scoring, not the wheels
 
 			switch (currentInstruction) {
 				case 0: {
 
-					if (caseStopwatch.seconds() < 10) {
-						isOkToMoveOn = false;
+					if (caseStopwatch.seconds() < 6) {
+						isOkToMoveOn = detectMotif();
 					} else {
 						isOkToMoveOn = true;
 					}
-					//isOkToMoveOn = detectMotif();
 					break;
 				}
 
@@ -212,13 +260,15 @@ public class TylerAuto extends LinearOpMode {
 			}
 
 
-			//can add && isOkayToMoveOn
-			if (Math.abs(cerror) < cTreshold || isOkToMoveOn) {
-				caseStopwatch.reset();
-				caseStopwatch.startTime();
-				currentInstruction++;
-			}
-			telemetry.addData("cu", currentInstruction);
+				//can add && isOkayToMoveOn
+				if (Math.abs(cerror) < cTreshold && isOkToMoveOn) {
+					caseStopwatch.reset();
+					caseStopwatch.startTime();
+					currentInstruction++;
+				}
+				telemetry.addData("cu", currentInstruction);
+				telemetry.addData("time",caseStopwatch.seconds());
+
 
 		}
 
@@ -242,6 +292,7 @@ public class TylerAuto extends LinearOpMode {
 			for (AprilTagDetection tag : detections) {
 				if (obeliskTags.contains(tag.id)) {
 					TAGID = tag.id;
+					hasTag = true;
 					return true;
 				}
 			}

@@ -5,19 +5,25 @@ import static org.firstinspires.ftc.teamcode.subsystems.CameraSensor.*;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
+import android.graphics.Color;
+
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 
 import org.firstinspires.ftc.robotcore.external.navigation.*;
+import org.firstinspires.ftc.teamcode.subsystems.CameraSensor;
 import org.firstinspires.ftc.teamcode.subsystems.Drive.*;
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.opencv.Circle;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
+import org.firstinspires.ftc.vision.opencv.ColorRange;
+import org.firstinspires.ftc.vision.opencv.ImageRegion;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -113,6 +119,14 @@ public class DriveRed extends OpMode {
 
 	int numDetections = 0;
 
+	CameraSensor camera;
+
+	private ColorBlobLocatorProcessor colorLocatorPurple = null;
+
+	private ColorBlobLocatorProcessor colorLocatorGreen = null;
+
+	private AprilTagProcessor aprilTag;
+	static ArrayList<VisionProcessor> processors = new ArrayList<>();
 
 	//this is the red teleop code
 	// it can detect balls by color,
@@ -129,8 +143,53 @@ public class DriveRed extends OpMode {
 
 		robot.initGyro();
 
-		visionPortal = initVision();
+		//visionPortal = camera.initVision();
+		aprilTag = new AprilTagProcessor.Builder()
+				.setDrawAxes(true)
+				.setDrawCubeProjection(true)
+				.setDrawTagOutline(true)
+				.build();
 
+		colorLocatorGreen = new ColorBlobLocatorProcessor.Builder()
+				.setTargetColorRange(ColorRange.ARTIFACT_GREEN)   // Use a predefined color match
+				.setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+				.setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+				.setDrawContours(true)   // Show contours on the Stream Preview
+				.setBoxFitColor(0)       // Disable the drawing of rectangles
+				.setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
+				.setBlurSize(5)          // Smooth the transitions between different colors in image
+
+				// the following options have been added to fill in perimeter holes.
+				.setDilateSize(15)       // Expand blobs to fill any divots on the edges
+				.setErodeSize(15)        // Shrink blobs back to original size
+				.setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
+
+				.build();
+
+		colorLocatorPurple = new ColorBlobLocatorProcessor.Builder()
+				.setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
+				.setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+				.setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+				.setDrawContours(true)   // Show contours on the Stream Preview
+				.setBoxFitColor(0)       // Disable the drawing of rectangles
+				.setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
+				.setBlurSize(5)          // Smooth the transitions between different colors in image
+
+				// the following options have been added to fill in perimeter holes.
+				.setDilateSize(15)       // Expand blobs to fill any divots on the edges
+				.setErodeSize(15)        // Shrink blobs back to original size
+				.setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
+
+				.build();
+
+
+		VisionPortal.Builder o = new VisionPortal.Builder();
+		o.setCamera(hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1"));
+		o.addProcessor(aprilTag)
+				.addProcessor(colorLocatorGreen)
+				.addProcessor(colorLocatorPurple);
+
+		visionPortal = o.build();
 		// Start the live camera stream to the Driver Station preview window
 
 
@@ -142,9 +201,9 @@ public class DriveRed extends OpMode {
 	@Override
 	public void loop() {
 		telemetry.clear();
-		distanceFromBlob = handleBlobs();
-		detections = getTagDetections();
-		numDetections = detections.size();
+		//distanceFromBlob = camera.handleBlobs();
+		//detections = camera.getTagDetections();
+		//numDetections = detections.size();
 		telemetry.clear();
 
 //        detections = aprilTag.getDetections();
@@ -324,11 +383,12 @@ public class DriveRed extends OpMode {
 		if (gamepad1.left_bumper) {
 			targetFlyWheelVelo = -700;
 		} else if (gamepad1.right_bumper) {
-			targetFlyWheelVelo = -1000;
+			targetFlyWheelVelo = -2000;
 		} else {
 			targetFlyWheelVelo = 0;
 		}
-
+		//robot.flyWheel.setPower(-0.5);
+		telemetry.addData("velo", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
 		robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
 		//telemetry.addData("FlyWheelVelocity: ", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
 		//telemetry.addData("TargetFlywheelVelocity: ", targetFlyWheelVelo);
@@ -341,8 +401,10 @@ public class DriveRed extends OpMode {
 
 		if (gamepad2.b) {
 			//telemetry.addData("b is pressed", "");
-			robot.flyWheelRotator1.setPosition(farShootingPos - 0.2);
-			robot.flyWheelRotator2.setPosition(farShootingPos - 0.2);
+			//more neg is higher
+			//more pos is lower
+			robot.flyWheelRotator1.setPosition(farShootingPos - 0.15);
+			robot.flyWheelRotator2.setPosition(farShootingPos - 0.15);
 		} else if (gamepad2.y) {
 			//telemetry.addData("y is pressed", "");
 			robot.flyWheelRotator1.setPosition(farShootingPos - 0.1);
@@ -350,7 +412,8 @@ public class DriveRed extends OpMode {
 		}
 
 
-		//telemetry.addData("flyWheelPos1:", robot.flyWheelRotator1.getPosition());
+
+		telemetry.addData("flyWheelPos1:", robot.flyWheelRotator1.getPosition());
 		// telemetry.addData("flyWheelPos2:", robot.flyWheelRotator2.getPosition());
 
 		telemetry.addData("cError", cError);
