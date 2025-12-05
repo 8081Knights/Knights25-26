@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-
+@Disabled
 @TeleOp(name="colorSensorTest")
 public class ColorSensor extends OpMode {
 
