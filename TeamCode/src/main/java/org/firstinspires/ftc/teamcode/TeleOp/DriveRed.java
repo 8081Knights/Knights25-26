@@ -11,6 +11,8 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import android.util.Size;
+
 
 import org.firstinspires.ftc.robotcore.external.navigation.*;
 import org.firstinspires.ftc.teamcode.subsystems.CameraSensor;
@@ -70,7 +72,7 @@ public class DriveRed extends OpMode {
 
 	double distanceFromBlob;
 
-	double farShootingPos = 0.25;
+	double farShootingPos = 0.7;
 
 	double closeShootingPos = 0.5;
 
@@ -118,6 +120,7 @@ public class DriveRed extends OpMode {
 	double cH;
 
 	int numDetections = 0;
+	int autoFlywheelVelo = 700;
 
 	CameraSensor camera;
 
@@ -127,6 +130,8 @@ public class DriveRed extends OpMode {
 
 	private AprilTagProcessor aprilTag;
 	static ArrayList<VisionProcessor> processors = new ArrayList<>();
+
+	double prevRange = 0;
 
 	//this is the red teleop code
 	// it can detect balls by color,
@@ -184,10 +189,12 @@ public class DriveRed extends OpMode {
 
 
 		VisionPortal.Builder o = new VisionPortal.Builder();
-		o.setCamera(hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1"));
 		o.addProcessor(aprilTag)
 				.addProcessor(colorLocatorGreen)
-				.addProcessor(colorLocatorPurple);
+				.addProcessor(colorLocatorPurple)
+				.setCameraResolution(new Size(640, 480))
+				.setCamera(hardwareMap.get(org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName.class, "Webcam 1"))
+				.enableLiveView(false);
 
 		visionPortal = o.build();
 		// Start the live camera stream to the Driver Station preview window
@@ -202,9 +209,12 @@ public class DriveRed extends OpMode {
 	public void loop() {
 		telemetry.clear();
 		//distanceFromBlob = camera.handleBlobs();
-		//detections = camera.getTagDetections();
-		//numDetections = detections.size();
+		detections = aprilTag.getDetections();
+		numDetections = detections.size();
 		telemetry.clear();
+		telemetry.addData("Dets", detections);
+		telemetry.addData("Voltage", hardwareMap.voltageSensor.get("Control Hub").getVoltage());
+
 
 //        detections = aprilTag.getDetections();
 //        if (!detections.isEmpty()) {
@@ -270,6 +280,11 @@ public class DriveRed extends OpMode {
 		if (numDetections != 0) {
 			det = detections.get(0);
 		}
+		if(det != null) {
+			prevRange = det.ftcPose.range;
+			telemetry.addData("range", det.ftcPose.range);
+		}
+
 		if (det != null) {
 			if (det.id == redTagId || det.id == blueTagId) {
 				if (det.id == redTagId) {
@@ -301,8 +316,8 @@ public class DriveRed extends OpMode {
 						+ relX * sin(tagHeadingRad)
 						+ relY * cos(tagHeadingRad);
 
-				telemetry.addData("field X", xField);
-				telemetry.addData("field Y", yField);
+				//telemetry.addData("field X", xField);
+				//telemetry.addData("field Y", yField);
 
 				//the x is the x, and the y is y
 
@@ -313,10 +328,10 @@ public class DriveRed extends OpMode {
 
 				double currentRobotHeadingField = det.ftcPose.yaw - currentTagPos.getHeading(AngleUnit.DEGREES);
 				double gyroHeadingOrigin = currentRobotHeadingField - Math.toDegrees(gh);
-				telemetry.addData("current tag heading", currentTagPos.getHeading(AngleUnit.DEGREES));
-				telemetry.addData("yaw", det.ftcPose.yaw);
-				telemetry.addData("currentRobotHeading", currentRobotHeadingField);
-				telemetry.addData("gyroHeadingOrigin", gyroHeadingOrigin);
+//				telemetry.addData("current tag heading", currentTagPos.getHeading(AngleUnit.DEGREES));
+//				telemetry.addData("yaw", det.ftcPose.yaw);
+//				telemetry.addData("currentRobotHeading", currentRobotHeadingField);
+//				telemetry.addData("gyroHeadingOrigin", gyroHeadingOrigin);
 
 
 				//need to get this gh to be the offset between the gyro-h start and the field
@@ -326,8 +341,8 @@ public class DriveRed extends OpMode {
 				double gxField = gyroOriginCords[0];
 				double gyField = gyroOriginCords[1];
 
-				telemetry.addData("gyroOriginX: ", gxField);
-				telemetry.addData("gyroOriginY: ", gyField);
+//				telemetry.addData("gyroOriginX: ", gxField);
+//				telemetry.addData("gyroOriginY: ", gyField);
 
 				//if motif tag
 			} else {
@@ -381,15 +396,58 @@ public class DriveRed extends OpMode {
 //        }
 
 		if (gamepad1.left_bumper) {
-			targetFlyWheelVelo = -700;
+			targetFlyWheelVelo = -1400;//works for the corner peice close
 		} else if (gamepad1.right_bumper) {
-			targetFlyWheelVelo = -1800;
+			targetFlyWheelVelo = -1900;
 		} else {
 			targetFlyWheelVelo = 0;
 		}
+
+
 		//robot.flyWheel.setPower(-0.5);
 		telemetry.addData("velo", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
-		robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
+		if(gamepad1.right_trigger > 0.5){
+			double range;
+			if(det != null) {
+				 range = det.ftcPose.range;
+			} else {
+				range = prevRange;
+			}
+				if(Math.abs(range - 50) < 10){
+					autoFlywheelVelo = -1400;
+				} else if(Math.abs(range - 80) < 20){
+					autoFlywheelVelo = -1550;
+				}else if (Math.abs(range - 120) < 20){
+					autoFlywheelVelo = -1800;
+				} else {
+					autoFlywheelVelo = -700;
+				}
+
+			robot.flyWheel.setVelocity(autoFlywheelVelo, AngleUnit.DEGREES);
+				robot.flyWheelRotator1.setPosition(0.63);
+			robot.flyWheelRotator2.setPosition(0.63);
+		}else {
+			robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
+			if (gamepad2.b) {
+				//telemetry.addData("b is pressed", "");
+				//more neg is higher
+				//more pos is lower
+				robot.flyWheelRotator1.setPosition(0.6);
+				robot.flyWheelRotator2.setPosition(0.6);
+			} else if (gamepad2.y) {
+				//telemetry.addData("y is pressed", "");
+				robot.flyWheelRotator1.setPosition(farShootingPos);
+				robot.flyWheelRotator2.setPosition(farShootingPos);
+			} else if(gamepad2.x){
+			}
+
+
+			if(gamepad2.dpad_up){
+				farShootingPos += 0.01;
+			} else if (gamepad2.dpad_down) {
+				farShootingPos -= 0.01;
+			}
+		}
 		//telemetry.addData("FlyWheelVelocity: ", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
 		//telemetry.addData("TargetFlywheelVelocity: ", targetFlyWheelVelo);
 		//this checks if the difference is less than 1.5 spins per second
@@ -399,24 +457,9 @@ public class DriveRed extends OpMode {
 			// telemetry.addLine("WRONG VELO");
 		}
 
-		if (gamepad2.b) {
-			//telemetry.addData("b is pressed", "");
-			//more neg is higher
-			//more pos is lower
-			robot.flyWheelRotator1.setPosition(0.6);
-			robot.flyWheelRotator2.setPosition(0.6);
-		} else if (gamepad2.y) {
-			//telemetry.addData("y is pressed", "");
-			robot.flyWheelRotator1.setPosition(farShootingPos);
-			robot.flyWheelRotator2.setPosition(farShootingPos);
-		} else if(gamepad2.x){
-		}
 
-		if(gamepad2.dpad_up){
-			farShootingPos += 0.01;
-		} else if (gamepad2.dpad_down) {
-			farShootingPos -= 0.01;
-		}
+
+
 
 
 
@@ -475,10 +518,10 @@ public class DriveRed extends OpMode {
 		double rotY = rotCords[1];
 
 		double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-		robot.FLdrive.setPower(((rotY - rotX + rx) / denominator));
-		robot.BLdrive.setPower(((rotY + rotX + rx) / denominator));
-		robot.FRdrive.setPower(((rotY + rotX - rx) / denominator));
-		robot.BRdrive.setPower(((rotY - rotX - rx) / denominator));
+		robot.FLdrive.setPower(((rotY + rotX + rx) / denominator));
+		robot.BLdrive.setPower(((rotY - rotX + rx) / denominator));
+		robot.FRdrive.setPower(((rotY - rotX - rx) / denominator));
+		robot.BRdrive.setPower(((rotY + rotX - rx) / denominator));
 	}
 
 	public void manualMechanumDrive() {

@@ -33,7 +33,7 @@ public class HelperMethods {
 			theta = Math.toRadians(theta);
 		}
 		cords[0] = x * Math.cos(theta) - y * Math.sin(theta);
-		cords[1] = x * Math.sin(theta) - y * Math.cos(theta);
+		cords[1] = x * Math.sin(theta) + y * Math.cos(theta);
 		return cords;
 	}
 }

@@ -64,6 +64,7 @@ public class TylerAuto extends LinearOpMode {
 	boolean hasTag = false;
 
 	ElapsedTime caseStopwatch = new ElapsedTime();
+	ElapsedTime shootTimer = new ElapsedTime();
 
 	CurrentRobotPose currentPose = new CurrentRobotPose();
 
@@ -153,16 +154,17 @@ public class TylerAuto extends LinearOpMode {
 
         //starting pos: next to the big tower where you shoot the balls
         // see obelisk and shoot
-        robotPoses.add(new NewPositionOfRobot(40, -20, 0));
-        robotPoses.add(new NewPositionOfRobot(40, 0, -Math.PI*.5));
-/*
+		robotPoses.add(new NewPositionOfRobot(0, -40, 0));
+        //robotPoses.add(new NewPositionOfRobot(40, -20, 0));
+        //robotPoses.add(new NewPositionOfRobot(40, 0, -Math.PI*.5));
+
         // go down, grab first pattern
-        robotPoses.add(new NewPositionOfRobot(30, -30, Math.PI*.75));
-        robotPoses.add(new NewPositionOfRobot(10, -30, Math.PI*.75));
+       // robotPoses.add(new NewPositionOfRobot(30, -30, Math.PI*.75));
+       // robotPoses.add(new NewPositionOfRobot(10, -30, Math.PI*.75));
 
         // shoot pattern
-        robotPoses.add(new NewPositionOfRobot(30, 0, -Math.PI*.5));
-
+        //robotPoses.add(new NewPositionOfRobot(30, 0, -Math.PI*.5));
+/*
         // go down, grab 2nd pattern
         robotPoses.add(new NewPositionOfRobot(30, 54, Math.PI*.75));
         robotPoses.add(new NewPositionOfRobot(10, 54, Math.PI*.75));
@@ -229,8 +231,10 @@ public class TylerAuto extends LinearOpMode {
 
 			switch (currentInstruction) {
 				case 0: {
-
-					if (caseStopwatch.seconds() < 6) {
+					if(caseStopwatch.seconds() > 4){
+						shootBall();
+					}
+					if (caseStopwatch.seconds() < 15) {
 						isOkToMoveOn = detectMotif();
 					} else {
 						isOkToMoveOn = true;
@@ -277,14 +281,15 @@ public class TylerAuto extends LinearOpMode {
 
 
 
+	public void shootBall(){
+		robot.flyWheelRotator1.setPosition(0.6);
+		robot.flyWheelRotator2.setPosition(0.6);
+		robot.flyWheel.setVelocity(-1400);
+		robot.intake.setPower(0.95);
 
-	public void shootPurple() {
 
 	}
 
-	public void shootGreen() {
-
-	}
 
 	public boolean detectMotif() {
 		detections = aprilTag.getDetections();
@@ -300,14 +305,6 @@ public class TylerAuto extends LinearOpMode {
 		return false;
 	}
 
-
-	public void shootMotif(int id) {
-		// shoot the balls in respective pattern
-	}
-
-	public void sortBall() {
-
-	}
 
 
 }
