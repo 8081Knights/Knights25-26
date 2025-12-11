@@ -285,7 +285,7 @@ public class TylerAuto extends LinearOpMode {
 		robot.flyWheelRotator1.setPosition(0.6);
 		robot.flyWheelRotator2.setPosition(0.6);
 		robot.flyWheel.setVelocity(-1400);
-		robot.intake.setPower(0.95);
+		robot.intake.setPower(-0.95);
 
 
 	}
