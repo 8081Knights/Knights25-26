@@ -40,14 +40,16 @@ public class CameraSensor {
 	static HardwareSoftware robot;
 
 
-
-
 	public ArrayList<AprilTagDetection> getTagDetections() {
 		return aprilTag.getDetections();
 	}
 
 	public VisionPortal initVision() {
-		processors.clear();
+		processors = new ArrayList<>();
+		aprilTag = null;
+		colorLocatorGreen = null;
+		colorLocatorPurple = null;
+
 
 		aprilTag = initTagProcessor();
 		colorLocatorGreen = initGreenLocator();
@@ -100,9 +102,9 @@ public class CameraSensor {
 		VisionPortal.Builder o = new VisionPortal.Builder();
 		o.setCamera(cam);
 
-			for (VisionProcessor processor : list) {
-				o.addProcessor(processor);
-			}
+		for (VisionProcessor processor : list) {
+			o.addProcessor(processor);
+		}
 
 
 		return o.build();
