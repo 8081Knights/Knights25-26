@@ -8,6 +8,8 @@ import org.firstinspires.ftc.teamcode.HardwareSoftware;
 
 @TeleOp(name = "LEDTest")
 public class LEDTest extends OpMode {
+
+	//TODO: make the default be purple with the green rotating through slowly, then when it detects it blinks twice and sets the motif
 	private Servo motifLight1 = null;
 	private Servo motifLight2 = null;
 	private Servo motifLight3 = null;
