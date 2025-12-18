@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -18,7 +17,6 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
-@Disabled
 @TeleOp(name = "cameraTest")
 public class CameraTest extends OpMode {
 	// start of camera auto tracking code
@@ -33,8 +31,8 @@ public class CameraTest extends OpMode {
 	final int frameWidth = 1280;
 	int cameraBuffer = frameWidth / 3;
 
-	//private DcMotor         LDrive   = null;
-	//private DcMotor         RDrive  = null;
+	private DcMotor         LDrive   = null;
+	private DcMotor         RDrive  = null;
 	static final double COUNTS_PER_INCH = 33.3;
 
 	private ElapsedTime runtime = new ElapsedTime();
@@ -45,29 +43,30 @@ public class CameraTest extends OpMode {
 
 	VisionPortal.Builder vBuilder = new VisionPortal.Builder();
 
-	HardwareSoftware robot = new HardwareSoftware();
+	SparkFunOTOS gyro;
+
+	//HardwareSoftware robot = new HardwareSoftware();
 
 
 	//CRServo cameraServo;
 	double range = 0;
 
 	public void init() {
-
-		robot.init(hardwareMap);
-
-		robot.gyro.calibrateImu();
-		robot.gyro.resetTracking();
-
-		robot.gyro.setLinearUnit(DistanceUnit.INCH);
-		robot.gyro.setAngularUnit(AngleUnit.RADIANS);
-		SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
-		robot.gyro.setOffset(offset);
-		robot.gyro.setLinearScalar(1.0);
-		robot.gyro.setAngularScalar(1.0);
-		robot.gyro.calibrateImu();
-		robot.gyro.resetTracking();
-		SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
-		robot.gyro.setPosition(currentPosition);
+//		gyro = hardwareMap.get(SparkFunOTOS.class, "gyro");
+//
+//		gyro.calibrateImu();
+//		gyro.resetTracking();
+//
+//		gyro.setLinearUnit(DistanceUnit.INCH);
+//		gyro.setAngularUnit(AngleUnit.RADIANS);
+//		SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, 0);
+//		gyro.setOffset(offset);
+//		gyro.setLinearScalar(1.0);
+//		gyro.setAngularScalar(1.0);
+//		gyro.calibrateImu();
+//		gyro.resetTracking();
+//		SparkFunOTOS.Pose2D currentPosition = new SparkFunOTOS.Pose2D(0, 0, 0);
+//		gyro.setPosition(currentPosition);
 		// Create the AprilTag processor
 		//tagProcessor = AprilTagProcessor.easyCreateWithDefaults();
 		aprilTag = new AprilTagProcessor.Builder()
@@ -87,21 +86,23 @@ public class CameraTest extends OpMode {
 		telemetry.addLine("Initialized. Press Play.");
 		detections = aprilTag.getDetections();
 		initData += aprilTag.getDetections().size();
-		for (AprilTagDetection det : detections) {
-			initData += "ID: " + det.id + " X: " + det.ftcPose.x;
 
-			telemetry.addData("ID", det.id);
-			telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
-			telemetry.addData("Pose X", det.ftcPose.x);
-			telemetry.addData("Pose Y", det.ftcPose.y);
-			telemetry.addData("Heading (deg)", det.ftcPose.yaw);
-			telemetry.addData("Range", det.ftcPose.range);
-			range = det.ftcPose.range;
-			telemetry.update();
+		for (AprilTagDetection det : detections) {
+			if(det.id == 24 || det.id == 20) {
+				initData += "ID: " + det.id + " X: " + det.ftcPose.x;
+
+				telemetry.addData("ID", det.id);
+				telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
+				telemetry.addData("Pose X", det.ftcPose.x);
+				telemetry.addData("Pose Y", det.ftcPose.y);
+				telemetry.addData("Heading (deg)", det.ftcPose.yaw);
+				telemetry.addData("Range", det.ftcPose.range);
+				range = det.ftcPose.range;
+			}
 		}
 
-		//LDrive  = hardwareMap.get(DcMotor.class, "Ldrive");
-		//RDrive = hardwareMap.get(DcMotor.class, "Rdrive");
+		LDrive  = hardwareMap.get(DcMotor.class, "motor1");
+		RDrive = hardwareMap.get(DcMotor.class, "motor2");
 
 
 		telemetry.update();
@@ -114,22 +115,27 @@ public class CameraTest extends OpMode {
 
 		detections = aprilTag.getDetections();
 		for (AprilTagDetection det : detections) {
-			telemetry.addData("ID", det.id);
-			telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
-			telemetry.addData("Pose X", det.ftcPose.x);
-			telemetry.addData("Pose Y", det.ftcPose.y);
-			telemetry.addData("Heading (deg)", det.ftcPose.yaw);
-			telemetry.addData("Range", det.ftcPose.range);
-			range = det.ftcPose.range;
+			if (det.id == 24 || det.id == 20) {
+				telemetry.addData("ID", det.id);
+				telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
+				telemetry.addData("Pose X", det.ftcPose.x);
+				telemetry.addData("Pose Y", det.ftcPose.y);
+				telemetry.addData("Heading (deg)", det.ftcPose.yaw);
+				telemetry.addData("Range", det.ftcPose.range);
+				telemetry.addData("bearing", det.ftcPose.bearing);
+				double lateral = det.ftcPose.range * Math.sin(Math.toRadians(det.ftcPose.bearing));
+				telemetry.addData("lateral", lateral);
+				range = det.ftcPose.range;
 
-			// cameraServo.setPower(.2);
+				// cameraServo.setPower(.2);
 //                    if (det.ftcPose.yaw < 0){
 //                        cameraServo.setPower(tag.center.x - ((double) frameWidth / 2)) / ((double) frameWidth / 2) * 1.25);
 //                    }
 //                    if (det.ftcPose.yaw > 0){
 //                        cameraServo.setPower(-.2);
 //                    }
-			//List<AprilTagDetection> result = tagProcessor.getDetections();
+				//List<AprilTagDetection> result = tagProcessor.getDetections();
+			}
 		}
 
 
@@ -150,17 +156,29 @@ public class CameraTest extends OpMode {
 				//cameraServo.setPower(num);
 				telemetry.addData("thingy", (num));
 				//}
-				goToTag();
+				//goToTag();
 			}
 		} else {
 			telemetry.addData("TAG OUT", "NONE");
 			//cameraServo.setPower(0);
 		}
 
+
+		if(gamepad1.right_trigger > 0.5){
+			LDrive.setPower(0.7);
+		} else {
+			LDrive.setPower(0);
+		}
+		if(gamepad1.left_trigger > 0.5){
+			RDrive.setPower(0.7);
+		} else {
+			RDrive.setPower(0);
+		}
+
 		telemetry.update();
 
 	}
-
+/*
 	public void continuousEncoderDrive(double speed,
 									   double leftInches, double rightInches,
 									   double timeoutS) {
@@ -223,7 +241,7 @@ public class CameraTest extends OpMode {
             RDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
             sleep(250);   // optional pause after each move.
-            */
+
 
 
 	}
@@ -235,5 +253,6 @@ public class CameraTest extends OpMode {
 		}
 
 	}
+	*/
 }
 
