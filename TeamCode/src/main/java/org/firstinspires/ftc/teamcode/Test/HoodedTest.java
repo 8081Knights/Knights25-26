@@ -6,21 +6,16 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.HardwareSoftware;
+
 import java.util.ArrayList;
 
 @TeleOp(name = "Hood Test")
 public class HoodedTest extends OpMode {
-	private DcMotorEx flyWheel = null;
 
-	private Servo flyWheelRotator = null;
-	private DcMotorEx turnTableRotator = null;
+    HardwareSoftware robot = new HardwareSoftware();
 
-
-    private Servo sorter1 = null;
-    private Servo sorter2 = null;
-    private Servo sorter3 = null;
-
-	double pos = 0.5;
+    double pos = 0.5;
     int greenPosMotif = 0;
     int currentServo = 1;
 
@@ -40,15 +35,10 @@ public class HoodedTest extends OpMode {
 
 	@Override
 	public void init() {
-		flyWheelRotator = hardwareMap.get(Servo.class, "flyWheelRotator");
-		turnTableRotator = hardwareMap.get(DcMotorEx.class, "turnTableRotator");
-		flyWheel = hardwareMap.get(DcMotorEx.class, "flyWheel");
-        sorter1 = hardwareMap.get(Servo.class, "sorter1");
-        sorter2 = hardwareMap.get(Servo.class, "sorter2");
-        sorter3 = hardwareMap.get(Servo.class, "sorter3");
-        servos.add(sorter1);
-        servos.add(sorter2);
-        servos.add(sorter3);
+
+        servos.add(robot.sorter1);
+        servos.add(robot.sorter2);
+        servos.add(robot.sorter3);
         restServos.clear();
         restServos.addAll(servos);
     }
@@ -57,21 +47,25 @@ public class HoodedTest extends OpMode {
 	public void loop() {
 
 		if (gamepad1.x) {
-			turnTableRotator.setPower(0.3);
+			robot.turnTableRotator.setPower(0.9);
 		} else if (gamepad1.y) {
-			turnTableRotator.setPower(-0.3);
+			robot.turnTableRotator.setPower(-0.9);
 		} else {
-			turnTableRotator.setPower(0);
+			robot.turnTableRotator.setPower(0);
 		}
 
+        telemetry.addData("turntablething", robot.turnTableRotator.getCurrentPosition());
+
 		if (gamepad1.right_trigger > 0.5) {
-        //flyWheel.setPower(-0.95);
-        flyWheel.setVelocity(-2200);
-		} else {
-			flyWheel.setPower(0);
+        //robot.flyWheel.setPower(0.95);
+        robot.flyWheel.setVelocity(2100);
+		} else if (gamepad1.left_trigger > 0.5){
+            robot.flyWheel.setVelocity(1500);
+        } else {
+			robot.flyWheel.setPower(0);
 		}
-        telemetry.addData("Flywheel velo", flyWheel.getVelocity());
-        telemetry.addData("flywheel power", flyWheel.getPower());
+        telemetry.addData("Flywheel velo", robot.flyWheel.getVelocity());
+        telemetry.addData("flywheel power", robot.flyWheel.getPower());
 
         //rand number between 1 and 3
         if(gamepad1.dpad_up) {
@@ -111,27 +105,26 @@ public class HoodedTest extends OpMode {
           s.setPosition(restServoPos);
         }
 
-
-            Servo s = servos.get(currentServo - 1);
-            double current = s.getPosition();
-            double target = activeServoPos;
-            double step = 0.003;   // smaller = slower
-            if (Math.abs(current - target) > 0.002) {
-                if (current < target) {
-                    s.setPosition(Math.min(current + step, target));
-                } else {
-                    s.setPosition(Math.max(current - step, target));
-                }
+        Servo s = servos.get(currentServo - 1);
+        double current = s.getPosition();
+        double target = activeServoPos;
+        double step = 0.003;   // smaller = slower
+        if (Math.abs(current - target) > 0.002) {
+            if (current < target) {
+                s.setPosition(Math.min(current + step, target));
+            } else {
+                s.setPosition(Math.max(current - step, target));
             }
+        }
 
         telemetry.addData("currentServo", currentServo);
         if(greenPosMotif != 0) {
             telemetry.addData("greenPos", greenPosMotif);
         }
 
-        telemetry.addData("sort1", sorter1.getPosition());
-        telemetry.addData("sort2", sorter2.getPosition());
-        telemetry.addData("sort3", sorter3.getPosition());
+        telemetry.addData("sort1", robot.sorter1.getPosition());
+        telemetry.addData("sort2", robot.sorter2.getPosition());
+        telemetry.addData("sort3", robot.sorter3.getPosition());
 
 
 
@@ -142,7 +135,7 @@ public class HoodedTest extends OpMode {
             pos -= 0.02;
          }
          pos = Math.min(1, pos);
-         flyWheelRotator.setPosition(pos);
+         robot.flyWheelRotator.setPosition(pos);
          telemetry.addData("hood pos", pos);
 
 	}

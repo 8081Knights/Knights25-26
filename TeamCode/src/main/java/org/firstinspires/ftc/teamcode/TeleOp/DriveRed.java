@@ -403,7 +403,6 @@ public class DriveRed extends OpMode {
 			targetFlyWheelVelo = 0;
 		}
 
-
 		//robot.flyWheel.setPower(-0.5);
 		telemetry.addData("velo", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
 		if(gamepad1.right_trigger > 0.5){
@@ -413,31 +412,29 @@ public class DriveRed extends OpMode {
 			} else {
 				range = prevRange;
 			}
-				if(Math.abs(range - 50) < 10){
-					autoFlywheelVelo = -1400;
-				} else if(Math.abs(range - 80) < 20){
-					autoFlywheelVelo = -1550;
-				}else if (Math.abs(range - 120) < 20){
-					autoFlywheelVelo = -1800;
-				} else {
-					autoFlywheelVelo = -700;
-				}
+			if(Math.abs(range - 50) < 10){
+				autoFlywheelVelo = -1400;
+			} else if(Math.abs(range - 80) < 20){
+				autoFlywheelVelo = -1550;
+			}else if (Math.abs(range - 120) < 20){
+				autoFlywheelVelo = -1800;
+			} else {
+				autoFlywheelVelo = -700;
+			}
 
 			robot.flyWheel.setVelocity(autoFlywheelVelo, AngleUnit.DEGREES);
-				robot.flyWheelRotator1.setPosition(0.63);
-			robot.flyWheelRotator2.setPosition(0.63);
+			robot.flyWheelRotator.setPosition(0.5);
+
 		}else {
 			robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
 			if (gamepad2.b) {
 				//telemetry.addData("b is pressed", "");
 				//more neg is higher
 				//more pos is lower
-				robot.flyWheelRotator1.setPosition(0.6);
-				robot.flyWheelRotator2.setPosition(0.6);
+				robot.flyWheelRotator.setPosition(0.6);
 			} else if (gamepad2.y) {
 				//telemetry.addData("y is pressed", "");
-				robot.flyWheelRotator1.setPosition(farShootingPos);
-				robot.flyWheelRotator2.setPosition(farShootingPos);
+				robot.flyWheelRotator.setPosition(farShootingPos);
 			} else if(gamepad2.x){
 			}
 
@@ -465,7 +462,7 @@ public class DriveRed extends OpMode {
 
 
 
-		telemetry.addData("flyWheelPos1:", robot.flyWheelRotator1.getPosition());
+		telemetry.addData("flyWheelPos1:", robot.flyWheelRotator.getPosition());
 		 telemetry.addData("varPos:", farShootingPos);
 
 		telemetry.addData("cError", cError);
@@ -488,12 +485,12 @@ public class DriveRed extends OpMode {
 		//can just toggle between these two positions
 
 		if (gamepad2.dpad_right) {
-			robot.sorterServo.setPosition(0.1);
+			robot.sorter1.setPosition(0.1);
 			//  telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
 		}
 
 		if (gamepad2.dpad_left) {
-			robot.sorterServo.setPosition(0.6);
+			robot.sorter1.setPosition(0.6);
 			// telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
 		}
 
@@ -508,7 +505,7 @@ public class DriveRed extends OpMode {
 	public void manualHeadlessDrive() {
 		double y = -gamepad1.left_stick_y;
 		double x = gamepad1.left_stick_x;
-		double rx = gamepad1.right_stick_x;
+		double rx = -gamepad1.right_stick_x;
 
 		SparkFunOTOS.Pose2D pos = robot.gyro.getPosition();
 		double botHeading = -pos.h;

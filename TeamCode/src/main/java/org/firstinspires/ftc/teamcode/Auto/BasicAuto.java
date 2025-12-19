@@ -311,8 +311,7 @@ public class BasicAuto extends LinearOpMode {
 
 
 	public void primeFlywheel() {
-		robot.flyWheelRotator2.setPosition(0.45);
-		robot.flyWheelRotator1.setPosition(0.45);
+		robot.flyWheelRotator.setPosition(0.45);
 	}
 
 	public void shootBall() {

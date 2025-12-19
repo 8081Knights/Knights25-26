@@ -6,6 +6,7 @@ import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.har
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -28,15 +29,17 @@ public class HardwareSoftware {
 
     public DcMotorEx intake = null;
 
-    public Servo flyWheelRotator1 = null;
-    public Servo flyWheelRotator2 = null;
+    public Servo flyWheelRotator = null;
+    public DcMotorEx turnTableRotator = null;
 
-    public Servo sorterServo = null;
+    public Servo sorter1 = null;
+    public Servo sorter2 = null;
+    public Servo sorter3 = null;
+
 
 
     public SparkFunOTOS gyro;
 
-   // public WebcamName camera;
 
 
 
@@ -54,18 +57,19 @@ public class HardwareSoftware {
         BRdrive = hw.get(DcMotorEx.class, "BRdrive");
 
 
+        flyWheelRotator = hw.get(Servo.class, "flyWheelRotator");
+        turnTableRotator = hw.get(DcMotorEx.class, "turnTableRotator");
         flyWheel = hw.get(DcMotorEx.class, "flyWheel");
+        sorter1 = hw.get(Servo.class, "sorter1");
+        sorter2 = hw.get(Servo.class, "sorter2");
+        sorter3 = hw.get(Servo.class, "sorter3");
+
+
         intake = hw.get(DcMotorEx.class, "intake");
 
 
-        sorterServo = hw.get(Servo.class, "sorterServo");
-
-        flyWheelRotator1 = hw.get(Servo.class, "flyWheel1");
-        flyWheelRotator2 = hw.get(Servo.class, "flyWheel2");
 
         gyro = hw.get(SparkFunOTOS.class, "gyro");
-
-       // camera = hw.get(WebcamName.class, "Webcam777");
 
 
         FLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
@@ -75,11 +79,10 @@ public class HardwareSoftware {
 
         flyWheel.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         flyWheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        flyWheel.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        flyWheelRotator2.setDirection(Servo.Direction.REVERSE);
-        flyWheelRotator1.setDirection(Servo.Direction.FORWARD);
 
-        FLdrive.setDirection(DcMotorEx.Direction.REVERSE);
+        FLdrive.setDirection(DcMotorEx.Direction.FORWARD);
         BLdrive.setDirection(DcMotorEx.Direction.REVERSE);
         FRdrive.setDirection(DcMotorEx.Direction.FORWARD);
         BRdrive.setDirection(DcMotorEx.Direction.FORWARD);
