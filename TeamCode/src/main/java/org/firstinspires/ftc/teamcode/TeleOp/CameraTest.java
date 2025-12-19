@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.RotationMatrix;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -27,6 +28,8 @@ public class CameraTest extends OpMode {
 	VisionPortal visionPortal;
 	AprilTagProcessor aprilTag;
 	List<AprilTagDetection> detections;
+
+	AprilTagDetection bestDet = null;
 	final int TAGID = 20;
 	final int frameWidth = 1280;
 	int cameraBuffer = frameWidth / 3;
@@ -89,15 +92,7 @@ public class CameraTest extends OpMode {
 
 		for (AprilTagDetection det : detections) {
 			if(det.id == 24 || det.id == 20) {
-				initData += "ID: " + det.id + " X: " + det.ftcPose.x;
-
-				telemetry.addData("ID", det.id);
-				telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
-				telemetry.addData("Pose X", det.ftcPose.x);
-				telemetry.addData("Pose Y", det.ftcPose.y);
-				telemetry.addData("Heading (deg)", det.ftcPose.yaw);
-				telemetry.addData("Range", det.ftcPose.range);
-				range = det.ftcPose.range;
+				bestDet = det;
 			}
 		}
 
@@ -116,16 +111,9 @@ public class CameraTest extends OpMode {
 		detections = aprilTag.getDetections();
 		for (AprilTagDetection det : detections) {
 			if (det.id == 24 || det.id == 20) {
-				telemetry.addData("ID", det.id);
-				telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
-				telemetry.addData("Pose X", det.ftcPose.x);
-				telemetry.addData("Pose Y", det.ftcPose.y);
-				telemetry.addData("Heading (deg)", det.ftcPose.yaw);
-				telemetry.addData("Range", det.ftcPose.range);
-				telemetry.addData("bearing", det.ftcPose.bearing);
-				double lateral = det.ftcPose.range * Math.sin(Math.toRadians(det.ftcPose.bearing));
-				telemetry.addData("lateral", lateral);
-				range = det.ftcPose.range;
+				bestDet = det;
+
+
 
 				// cameraServo.setPower(.2);
 //                    if (det.ftcPose.yaw < 0){
@@ -138,8 +126,59 @@ public class CameraTest extends OpMode {
 			}
 		}
 
+		//telemetry.addData("ID", det.id);
+		//telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
+		telemetry.addData("Pose X", bestDet.ftcPose.x);
+		//telemetry.addData("Pose Y", det.ftcPose.y);
+		//telemetry.addData("Heading (deg)", det.ftcPose.yaw);
+		//telemetry.addData("Range", bestDet.ftcPose.range);
+		telemetry.addData("bearing", bestDet.ftcPose.bearing);
+		double lateral = bestDet.ftcPose.range * Math.sin(Math.toRadians(bestDet.ftcPose.bearing));
+		telemetry.addData("lateral", lateral);
+		telemetry.addData("diff", bestDet.ftcPose.x + lateral);
 
-		if (!detections.isEmpty()) {
+		range = bestDet.ftcPose.range;
+
+		// AprilTag gives Tag → Camera rotation
+		double tagToCamYaw   = Math.toRadians(bestDet.ftcPose.yaw);
+		double tagToCamPitch = Math.toRadians(bestDet.ftcPose.pitch);
+		double tagToCamRoll  = Math.toRadians(bestDet.ftcPose.roll);
+
+		// Convert to rotation matrix
+		RotationMatrix R_TC =
+				RotationMatrix.fromYawPitchRoll(tagToCamYaw, tagToCamPitch, tagToCamRoll);
+
+		// Invert to get Camera → Tag
+		RotationMatrix R_CT = R_TC.transpose();
+
+
+		// Example: tag faces toward +X on the field
+		double tagFieldYaw   = Math.toRadians(180);
+		double tagFieldPitch = 0;
+		double tagFieldRoll  = 0;
+
+		RotationMatrix R_WT =
+				RotationMatrix.fromYawPitchRoll(tagFieldYaw, tagFieldPitch, tagFieldRoll);
+
+		RotationMatrix R_WC = R_WT.multiply(R_CT);
+
+		// Camera heading on the field
+		double cameraYawRad = R_WC.getYaw();
+		double cameraYawDeg = Math.toDegrees(cameraYawRad);
+
+		double camToRobotYaw = Math.toRadians(90); // example
+		RotationMatrix R_CR =
+				RotationMatrix.fromYawPitchRoll(camToRobotYaw, 0, 0);
+
+		// Field → Robot
+		RotationMatrix R_WR = R_WC.multiply(R_CR);
+
+		double robotYawDeg = Math.toDegrees(R_WR.getYaw());
+
+
+
+
+		/*if (!detections.isEmpty()) {
 			for (AprilTagDetection tag : detections) {
 				//if (tag.id == TAGID) {
 				telemetry.addData("TAG OUT", tag.center.x);
@@ -151,7 +190,7 @@ public class CameraTest extends OpMode {
                                 }
                                 else {
                                     cameraServo.setPower(0);
-                                }*/
+                                }
 				double num = -((tag.center.x - ((double) frameWidth / 2)) / ((double) frameWidth / 2) * 1.2);
 				//cameraServo.setPower(num);
 				telemetry.addData("thingy", (num));
@@ -162,6 +201,9 @@ public class CameraTest extends OpMode {
 			telemetry.addData("TAG OUT", "NONE");
 			//cameraServo.setPower(0);
 		}
+
+		 */
+
 
 
 		if(gamepad1.right_trigger > 0.5){
