@@ -1,185 +1,196 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.teamcode.HelperMethods.*;
+import static androidx.core.math.MathUtils.clamp;
+import static org.firstinspires.ftc.teamcode.HelperMethods.normalizeAngle;
 import static java.lang.Math.*;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
-
-import java.util.Arrays;
 
 public class Drive {
 
+    private static void stopDrive(HardwareSoftware robot) {
+        robot.FLdrive.setPower(0);
+        robot.BLdrive.setPower(0);
+        robot.FRdrive.setPower(0);
+        robot.BRdrive.setPower(0);
+    }
 
-	//should contain all of the drive related code, eg: headless, mechanum, go to position
-	//would make the subsystems folder cleaner and make more sense at a glance
+    /* ================= Target Pose ================= */
+    public static class NewPositionOfRobot {
+        public double newx, newy;
+        public double newRotation;
+        public double speed = 0.7;
+
+        public NewPositionOfRobot(double x, double y, double rot) {
+            newx = x;
+            newy = y;
+            newRotation = rot;
+        }
+
+        public NewPositionOfRobot(double x, double y, double rot, double spd) {
+            newx = x;
+            newy = y;
+            newRotation = rot;
+            speed = spd;
+        }
+    }
+
+    /* ================= Current Pose ================= */
+    public static class CurrentRobotPose {
+
+        public double realRobotX, realRobotY, realRobotHeading;
+
+        private double prevErrX = 0;
+        private double prevErrY = 0;
+
+        /* -------- Initialize (used once) -------- */
+        public void init(HardwareSoftware hw, double x, double y, double heading) {
+            realRobotX = x;
+            realRobotY = y;
+            realRobotHeading = heading;
+        }
+
+        /* -------- Update pose from OTOS -------- */
+        public void updateRealRobotPositions(SparkFunOTOS.Pose2D pose) {
+            realRobotX = pose.x;
+            realRobotY = pose.y;
+            realRobotHeading = normalizeAngle(pose.h);
+        }
+
+        /* ================= Motion Controller ================= */
+        public double moveToSetPosition(NewPositionOfRobot target, HardwareSoftware robot) {
+
+            /* ======== TUNING ======== */
+            final double kP_xy = 0.08;
+            final double kD_xy = 0.02;
+
+            final double kP_turn = 0.7;
+
+            final double deadbandXY = 0.5;               // inches
+            final double deadbandH  = toRadians(2);      // radians
+
+            final double minPowerXY = 0.05;
+            /* ======================= */
+
+            /* -------- Position error -------- */
+            double errX = target.newx - realRobotX;
+            double errY = target.newy - realRobotY;
+
+            double distance = hypot(errX, errY);
+
+            /* -------- Heading error -------- */
+            double headingError = normalizeAngle(target.newRotation - realRobotHeading);
+
+            /* -------- Derivative (damping) -------- */
+            double dX = errX - prevErrX;
+            double dY = errY - prevErrY;
+
+            prevErrX = errX;
+            prevErrY = errY;
+
+            /* -------- XY PID -------- */
+            double powX = (kP_xy * errX) - (kD_xy * dX);
+            double powY = (kP_xy * errY) - (kD_xy * dY);
+
+            /* -------- Deadbands -------- */
+            if (abs(errX) < deadbandXY) powX = 0;
+            if (abs(errY) < deadbandXY) powY = 0;
+
+            /* -------- Min power -------- */
+            if (powX != 0) powX = copySign(max(abs(powX), minPowerXY), powX);
+            if (powY != 0) powY = copySign(max(abs(powY), minPowerXY), powY);
+
+            powX = clamp(powX, -1, 1);
+            powY = clamp(powY, -1, 1);
+
+            /* -------- Rotation (gated) -------- */
+            // Rotation authority increases as we get closer
+            double turnScale = clamp(1.0 - (distance / 36.0), 0.4, 1.0);
+
+            double rx = kP_turn * headingError * turnScale;
+
+            // Phase 0: minimum rotation while moving
+            double minTurn = 0.08;
+            if (abs(rx) < minTurn && abs(headingError) > toRadians(3)) {
+                rx = copySign(minTurn, headingError);
+            }
+
+            if (abs(headingError) < deadbandH) rx = 0;
+            rx = clamp(rx, -0.5, 0.5);
+
+            /* -------- Speed scaling -------- */
+            double speedScale = clamp(distance / 12.0, 0.25, 1.0);
+            double finalSpeed = target.speed * speedScale;
+
+            /* -------- Field-centric transform -------- */
+            double h = -realRobotHeading;
+            double rotX = powX * cos(h) - powY * sin(h);
+            double rotY = powX * sin(h) + powY * cos(h);
+
+            /* -------- Mecanum -------- */
+            double fl = -rotY - rotX + rx;
+            double bl = -rotY + rotX + rx;
+            double fr = -rotY + rotX - rx;
+            double br = -rotY - rotX - rx;
+
+            double max = max(1.0, max(
+                    max(abs(fl), abs(fr)),
+                    max(abs(bl), abs(br))
+            ));
+
+            robot.FLdrive.setPower(fl / max * finalSpeed);
+            robot.BLdrive.setPower(bl / max * finalSpeed);
+            robot.FRdrive.setPower(fr / max * finalSpeed);
+            robot.BRdrive.setPower(br / max * finalSpeed);
+
+            /* -------- Completion metric -------- */
+            boolean atPos = distance < 0.7;
+            boolean atHeading = abs(headingError) < toRadians(3);
 
 
-	/**
-	 * Represents the new position and rotation of the robot.
-	 */
-	public static class NewPositionOfRobot {
-		public boolean justDrive;
-		public double newx, newy;
-		public double newRotation;
-		public double speed = .9;
+            return distance;
+        }
 
-		/**
-		 * Sets the robot's future position and rotation.
-		 *
-		 * @param nx     The new x-coordinate.
-		 * @param ny     The new y-coordinate.
-		 * @param newRot The new rotation angle.
-		 */
-		public NewPositionOfRobot(double nx, double ny, double newRot) {
-			this.newx = nx;
-			this.newy = ny;
-			this.newRotation = newRot;
-			justDrive = true;
-		}
+        /**
+         * Rotates the robot in place to a target heading.
+         *
+         * @param targetHeading radians (field-centric)
+         * @param robot hardware reference
+         * @return true when rotation is complete
+         */
+        public boolean turnOnly(double targetHeading, HardwareSoftware robot) {
 
-		public NewPositionOfRobot(double nx, double ny, double newRot, double setspeed) {
-			this.newx = nx;
-			this.newy = ny;
-			this.newRotation = newRot;
-			this.speed = setspeed;
-			justDrive = true;
-		}
+            // Compute shortest angular error
+            double error = normalizeAngle(targetHeading - realRobotHeading);
 
-	}
+            // Deadband (radians)
+            double tolerance = Math.toRadians(2.0);
+            if (Math.abs(error) < tolerance) {
+                stopDrive(robot);
+                return true;
+            }
 
+            // Proportional turn control
+            double kP = 0.8;
+            double rx = error * kP;
 
-	public static class CurrentRobotPose {
-		HardwareSoftware robotHardwaremap;
-		public double realRobotX, realRobotY, realRobotHeading;
-		public double gyX, gyY, gyR;
+            // Clamp power
+            rx = Math.max(-0.5, Math.min(0.5, rx));
 
-		public  double cDx = 0;
-		public  double cDy = 0;
-		public  double cDh = 0;
+            // Minimum power to overcome static friction
+            double minTurn = 0.15;
+            if (Math.abs(rx) < minTurn) {
+                rx = Math.signum(rx) * minTurn;
+            }
 
-		public double initX, initY, initZ;
+            // Apply pure rotation
+            robot.FLdrive.setPower(rx);
+            robot.BLdrive.setPower(rx);
+            robot.FRdrive.setPower(-rx);
+            robot.BRdrive.setPower(-rx);
 
-		/**
-		 * Initializes the robot's pose.
-		 *
-		 * @param hwMap The hardware map.
-		 * @param inX   The initial x-coordinate.
-		 * @param inY   The initial y-coordinate.
-		 * @param inz   The initial z-coordinate.
-		 */
-		public void init(HardwareSoftware hwMap, double inX, double inY, double inz) {
-			this.robotHardwaremap = hwMap;
-			this.initX = inX;
-			this.initY = inY;
-			this.initZ = inz;
-		}
-
-		/**
-		 * Updates the robot's real positions based on gyroscope values.
-		 *
-		 * @param gyroValue The current gyroscope position.
-		 */
-		public void updateRealRobotPositions(SparkFunOTOS.Pose2D gyroValue) {
-			gyX = gyroValue.x;
-			gyY = gyroValue.y;
-			gyR = gyroValue.h;
-
-			realRobotX = initX + gyX;
-			realRobotY = initY + gyY;
-			realRobotHeading = initZ + normalizeAngle(gyR);
-		}
-
-		/**
-		 * Moves the robot to a set position and returns the current error.
-		 *
-		 * @param setPose The target position and rotation.
-		 * @return The current error between the robot's position and the target position.
-		 */
-		public double moveToSetPosition(NewPositionOfRobot setPose, HardwareSoftware robot) {
-			double currentError = 0;
-			double powY, powX, rx = 0;
-			double powdY, powdX;
-
-			powdX = setPose.newx - realRobotX;
-			powdY = setPose.newy - realRobotY;
-
-			if (powdX > 3 || powdX < -3) {
-				powX = Math.signum(powdX);
-			} else {
-				powX = powdX / 3;
-			}
-
-			if (powdY > 3 || powdY < -3) {
-				powY = Math.signum(powdY);
-			} else {
-				powY = powdY / 3;
-			}
-
-			double[] altAngles = new double[3];
-			double[] diffAngles = new double[3];
-
-			altAngles[0] = setPose.newRotation - 2 * Math.PI;
-			altAngles[1] = setPose.newRotation;
-			altAngles[2] = setPose.newRotation + 2 * Math.PI;
-
-			for (int i = 0; i < 3; ++i) {
-				diffAngles[i] = altAngles[i] - realRobotHeading;
-			}
-
-			Arrays.sort(diffAngles);
-
-			int goodindex = 0;
-
-			if (Math.abs(diffAngles[1]) < Math.abs(diffAngles[0])) {
-				goodindex = 1;
-			}
-			if (Math.abs(diffAngles[2]) < Math.abs(diffAngles[0])) {
-				goodindex = 2;
-			}
-			if (Math.abs(diffAngles[2]) < Math.abs(diffAngles[1])) {
-				goodindex = 2;
-			}
-			if (Math.abs(diffAngles[1]) < Math.abs(diffAngles[2])) {
-				goodindex = 1;
-			}
-
-			rx = diffAngles[goodindex];
-
-//            telemetry.addData("diffIn0", diffAngles[0]);
-//            telemetry.addData("diffIn1", diffAngles[1]);
-//            telemetry.addData("diffIn2", diffAngles[2]);
-
-
-			double dx = setPose.newx - realRobotX;
-			double dy = setPose.newy - realRobotY;
-			//dy and dx are basically powx and powy, but not changed some, might want to revert back to the pow stuff fully
-			//seems to be messing with the pid tuning, not as accurate
-
-			double botHeading = -realRobotHeading;
-			double realSetX = powX * cos(botHeading) - powY * sin(botHeading);
-			double realSetY = powX * sin(botHeading) + powY * cos(botHeading);
-
-//            telemetry.addData("powx", powX);
-//            telemetry.addData("powy", powY);
-//            telemetry.addData("realSetX", realSetX);
-//            telemetry.addData("realSetY", realSetY);
-//            telemetry.addData("rx", rx);
-
-			//basically just does headless until it gets to the right position
-			double denominator = Math.max(Math.abs(powY) + Math.abs(powX) + Math.abs(rx), 1);
-
-			robot.FLdrive.setPower(((-realSetY - realSetX - rx) / denominator) * setPose.speed);
-			robot.BLdrive.setPower(((-realSetY + realSetX - rx) / denominator) * setPose.speed);
-			robot.FRdrive.setPower(((-realSetY + realSetX + rx) / denominator) * setPose.speed);
-			robot.BRdrive.setPower(((-realSetY - realSetX + rx) / denominator) * setPose.speed);
-			cDx = Math.abs(powX);
-			cDy = Math.abs(powY);
-			cDh = Math.abs(rx);
-			currentError = cDx + cDy + cDh;
-			return currentError;
-		}
-
-	}
+            return false;
+        }
+    }
 }
