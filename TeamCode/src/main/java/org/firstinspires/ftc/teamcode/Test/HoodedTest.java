@@ -13,8 +13,6 @@ import java.util.ArrayList;
 @TeleOp(name = "Hood Test")
 public class HoodedTest extends OpMode {
 
-    HardwareSoftware robot = new HardwareSoftware();
-
     double pos = 0.5;
     int greenPosMotif = 0;
     int currentServo = 1;
@@ -31,41 +29,68 @@ public class HoodedTest extends OpMode {
 
     boolean isSorting = false;
 
+    int velocity = 1000;
+
     int numServosMoved = 0;
+
+    Servo sorter1;
+    Servo sorter2;
+    Servo sorter3;
+    DcMotorEx flyWheel;
+    DcMotorEx turnTableRotator;
 
 	@Override
 	public void init() {
+        sorter1 = hardwareMap.get(Servo.class, "sorter1");
+        sorter2 = hardwareMap.get(Servo.class, "sorter2");
+        sorter3 = hardwareMap.get(Servo.class, "sorter3");
 
-        servos.add(robot.sorter1);
-        servos.add(robot.sorter2);
-        servos.add(robot.sorter3);
+
+        flyWheel = hardwareMap.get(DcMotorEx.class, "flyWheel");
+        turnTableRotator = hardwareMap.get(DcMotorEx.class, "turnTableRotator");
+
+
+        servos.add(sorter1);
+        servos.add(sorter2);
+        servos.add(sorter3);
         restServos.clear();
         restServos.addAll(servos);
     }
 
 	@Override
 	public void loop() {
-
 		if (gamepad1.x) {
-			robot.turnTableRotator.setPower(0.9);
+			turnTableRotator.setPower(0.9);
 		} else if (gamepad1.y) {
-			robot.turnTableRotator.setPower(-0.9);
+			turnTableRotator.setPower(-0.9);
 		} else {
-			robot.turnTableRotator.setPower(0);
+			turnTableRotator.setPower(0);
 		}
 
-        telemetry.addData("turntablething", robot.turnTableRotator.getCurrentPosition());
 
+
+        telemetry.addData("turntablething", turnTableRotator.getCurrentPosition());
+        //1150 works for shooting from close
+        //700 is waay to slow
 		if (gamepad1.right_trigger > 0.5) {
         //robot.flyWheel.setPower(0.95);
-        robot.flyWheel.setVelocity(2100);
+        flyWheel.setVelocity(1800);
 		} else if (gamepad1.left_trigger > 0.5){
-            robot.flyWheel.setVelocity(1500);
-        } else {
-			robot.flyWheel.setPower(0);
-		}
-        telemetry.addData("Flywheel velo", robot.flyWheel.getVelocity());
-        telemetry.addData("flywheel power", robot.flyWheel.getPower());
+            flyWheel.setVelocity(1150);
+        } else if(gamepad1.left_bumper){
+			flyWheel.setVelocity(velocity);
+		} else {
+            flyWheel.setPower(0);
+        }
+
+        if(gamepad1.left_stick_y > 0.1){
+            velocity += 10;
+        } else if (gamepad1.left_stick_y < -0.1){
+            velocity -= 10;
+        }
+        telemetry.addData("flywheel custom velo: ", velocity);
+        telemetry.addData("Flywheel velo", flyWheel.getVelocity());
+        telemetry.addData("flywheel power", flyWheel.getPower());
 
         //rand number between 1 and 3
         if(gamepad1.dpad_up) {
@@ -122,9 +147,9 @@ public class HoodedTest extends OpMode {
             telemetry.addData("greenPos", greenPosMotif);
         }
 
-        telemetry.addData("sort1", robot.sorter1.getPosition());
-        telemetry.addData("sort2", robot.sorter2.getPosition());
-        telemetry.addData("sort3", robot.sorter3.getPosition());
+        telemetry.addData("sort1", sorter1.getPosition());
+        telemetry.addData("sort2", sorter2.getPosition());
+        telemetry.addData("sort3", sorter3.getPosition());
 
 
 
@@ -135,7 +160,7 @@ public class HoodedTest extends OpMode {
             pos -= 0.02;
          }
          pos = Math.min(1, pos);
-         robot.flyWheelRotator.setPosition(pos);
+         //flyWheelRotator.setPosition(pos);
          telemetry.addData("hood pos", pos);
 
 	}
