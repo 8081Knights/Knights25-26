@@ -201,7 +201,7 @@ public class TylerAuto extends LinearOpMode {
 		double cerror;
 
 
-		while (opModeIsActive() && !isStopRequested() && currentInstruction < robotPoses.size()) {
+		/*while (opModeIsActive() && !isStopRequested() && currentInstruction < robotPoses.size()) {
 			pos = robot.gyro.getPosition();
 			telemetry.addData("Posx", pos.x);
 			telemetry.addData("Posy", pos.y);
@@ -276,7 +276,7 @@ public class TylerAuto extends LinearOpMode {
 
 		}
 
-
+*/
 	}
 
 
