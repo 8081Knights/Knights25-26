@@ -105,7 +105,7 @@ public class HardwareSoftware {
         gyro.setLinearUnit(DistanceUnit.INCH);
         gyro.setAngularUnit(AngleUnit.RADIANS);
 
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(-6.186, 0.7, 0);
         gyro.setOffset(offset);
         gyro.setLinearScalar(1.0);
         gyro.setAngularScalar(1.0);
@@ -128,7 +128,7 @@ public class HardwareSoftware {
         gyro.setLinearUnit(DistanceUnit.INCH);
         gyro.setAngularUnit(AngleUnit.RADIANS);
 
-        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(6.186, 0.7, 0);
+        SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(-6.186, 0.7, 0);
         gyro.setOffset(offset);
         gyro.setLinearScalar(1.0);
         gyro.setAngularScalar(1.0);
