@@ -6,13 +6,7 @@ public class HelperMethods {
 	 * normalizes an angle - because it is cyclical, keeps it in range of (0, 2pi)
 	 */
 	public static double normalizeAngle(double angle) {
-		while (angle < 0) {
-			angle += 2 * Math.PI;
-		}
-		while (angle >= 2 * Math.PI) {
-			angle -= 2 * Math.PI;
-		}
-		return angle;
+		return Math.atan2(Math.sin(angle), Math.cos(angle));
 	}
 
 
