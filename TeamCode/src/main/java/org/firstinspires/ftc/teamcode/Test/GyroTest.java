@@ -3,10 +3,12 @@ package org.firstinspires.ftc.teamcode.Test;
 import static org.firstinspires.ftc.teamcode.HelperMethods.rotateCord;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
+@Disabled
 @TeleOp(name = "GyroTest")
 public class GyroTest extends OpMode {
     HardwareSoftware robot = new HardwareSoftware();
