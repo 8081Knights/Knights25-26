@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Test;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode.HardwareSoftware;
 @Disabled
@@ -10,20 +11,20 @@ import org.firstinspires.ftc.teamcode.HardwareSoftware;
 public class FlyWheelTest extends OpMode {
 	//flywheel test class
 	//TEST, NOT MATCHES
-	HardwareSoftware robot = new HardwareSoftware();
-
+	DcMotorEx flyWheel = null;
 	@Override
 	public void init() {
-		robot.init(hardwareMap);
+		flyWheel = hardwareMap.get(DcMotorEx.class, "flyWheel");
 	}
 
 	@Override
 	public void loop() {
 		if (gamepad1.a) {
-			robot.flyWheel.setPower(-0.85);
+			flyWheel.setVelocity(-1300);
 			telemetry.addData("SHOOTING", " YAY");
+			telemetry.addData("velo", flyWheel.getVelocity());
 		} else {
-			robot.flyWheel.setPower(0);
+			flyWheel.setPower(0);
 		}
 		telemetry.update();
 	}
