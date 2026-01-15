@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.HardwareSoftware;
 import java.util.ArrayList;
 @TeleOp(name = "Servo Test AI")
 public class ServoTestAI extends OpMode {
+    //OUTDATED
 
     double pos = 0.5;
     int greenPosMotif = 0;
