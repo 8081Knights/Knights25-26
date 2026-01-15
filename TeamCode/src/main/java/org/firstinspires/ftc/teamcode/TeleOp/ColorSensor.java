@@ -65,26 +65,19 @@ public class ColorSensor extends OpMode {
         int red = (int)(r * 255);
         int green = (int)(g * 255);
         int blue = (int)(b * 255);
-        if (green >= 25 && blue <= 30 && red <= 10){
-            return true;
-        }
+        return  (green >= 25 && blue <= 30 && red <= 10);
 
-        return false;
     }
-        public boolean isPurple(RevColorSensorV3 sensor){
-            NormalizedRGBA colors = sensor.getNormalizedColors();
+    public boolean isPurple(RevColorSensorV3 sensor){
+        NormalizedRGBA colors = sensor.getNormalizedColors();
+        float r = colors.red;
+        float g = colors.green;
+        float b = colors.blue;
 
-            float r = colors.red;
-            float g = colors.green;
-            float b = colors.blue;
-
-            int red = (int)(r * 255);
-            int green = (int)(g * 255);
-            int blue = (int)(b * 255);
-            if (blue >= 25 && red >= 10 && green <= 15){
-                return true;
-            }
-            return false;
+        int red = (int)(r * 255);
+        int green = (int)(g * 255);
+        int blue = (int)(b * 255);
+        return (blue >= 25 && red >= 10 && green <= 15);
     }
     public boolean isEmpty(RevColorSensorV3 sensor){
         NormalizedRGBA colors = sensor.getNormalizedColors();
@@ -96,10 +89,7 @@ public class ColorSensor extends OpMode {
         int red = (int)(r * 255);
         int green = (int)(g * 255);
         int blue = (int)(b * 255);
-        if (blue <= 2 && red <= 2 && green <= 2){
-            return true;
-        }
-        return false;
+        return (blue <= 2 && red <= 2 && green <= 2);
     }
     public int getNumBalls (){
         int num = 0;
@@ -119,36 +109,46 @@ public class ColorSensor extends OpMode {
         if (getNumBalls() == 0){
             return;
         }
+        updateStates();
+        if (Astate == BallState.GREEN){
+            //Active servos.add(servoA);
+        }
+        if (Bstate == BallState.GREEN){
+            //Active servos.add(servoB);
+        }
+        if (Cstate == BallState.GREEN){
+            //Active servos.add(servoC);
+        }
 
+        //figure out which space has a green ball,
+        // add the proper servo to the active servos list
 
 
     }
     public void updateStates (){
         if (!isEmpty(colorSensor1) || !isEmpty(colorSensor2)) {
+
             if (isGreen(colorSensor1) || (isGreen(colorSensor2))) {
                 Astate = BallState.GREEN;
             } else {
                 Astate = BallState.PURPLE;
-
-            }
-            if (!isEmpty(colorSensor3) || !isEmpty(colorSensor4)) {
-                if (isGreen(colorSensor3) || (isGreen(colorSensor4))) {
-                    Bstate = BallState.GREEN;
-                } else {
-                    Bstate = BallState.PURPLE;
-
-                }
-                if (!isEmpty(colorSensor5) || !isEmpty(colorSensor6)) {
-                    if (isGreen(colorSensor5) || (isGreen(colorSensor6))) {
-                        Cstate = BallState.GREEN;
-                    } else {
-                        Cstate = BallState.PURPLE;
-
-                    }
-                }
-
             }
         }
+        if (!isEmpty(colorSensor3) || !isEmpty(colorSensor4)) {
+            if (isGreen(colorSensor3) || (isGreen(colorSensor4))) {
+                Bstate = BallState.GREEN;
+            } else {
+                Bstate = BallState.PURPLE;
+            }
+        }
+        if (!isEmpty(colorSensor5) || !isEmpty(colorSensor6)) {
+            if (isGreen(colorSensor5) || (isGreen(colorSensor6))) {
+                Cstate = BallState.GREEN;
+            } else {
+                Cstate = BallState.PURPLE;
+            }
+        }
+
     }
 }
 
