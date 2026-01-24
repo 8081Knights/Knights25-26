@@ -261,7 +261,7 @@ public class RedFacingGoalAuto extends LinearOpMode {
     public void shootBall(){
         robot.flyWheelRotator.setPosition(0.6);
         robot.flyWheel.setVelocity(-1400);
-        robot.intake.setPower(-0.95);
+       // robot.intake.setPower(-0.95);
 
     }
 

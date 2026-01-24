@@ -4,6 +4,7 @@ package org.firstinspires.ftc.teamcode;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -27,14 +28,16 @@ public class HardwareSoftware {
 
     public DcMotorEx flyWheel = null;
 
-    public DcMotorEx intake = null;
-
     public Servo flyWheelRotator = null;
-    public DcMotorEx turnTableRotator = null;
+    public Servo turnTableRotator = null;
 
     public Servo sorter1 = null;
     public Servo sorter2 = null;
-    public Servo sorter3 = null;
+
+    public CRServo FRintake = null;
+    public CRServo FLintake = null;
+    public CRServo BRintake = null;
+    public CRServo BLintake = null;
 
 
 
@@ -57,15 +60,22 @@ public class HardwareSoftware {
         BRdrive = hw.get(DcMotorEx.class, "BRdrive");
 
 
-        flyWheelRotator = hw.get(Servo.class, "flyWheelRotator");
-        turnTableRotator = hw.get(DcMotorEx.class, "turnTableRotator");
-        flyWheel = hw.get(DcMotorEx.class, "flyWheel");
-        sorter1 = hw.get(Servo.class, "sorter1");
-        sorter2 = hw.get(Servo.class, "sorter2");
-        sorter3 = hw.get(Servo.class, "sorter3");
+        flyWheelRotator = hw.get(Servo.class, "hoodAdjuster");
+        turnTableRotator = hw.get(Servo.class, "turntable");
+        flyWheel = hw.get(DcMotorEx.class, "flywheel");
+        sorter1 = hw.get(Servo.class, "sorterA");
+        sorter2 = hw.get(Servo.class, "sorterB");
+
+        FRintake = hw.get(CRServo.class,  "FRintake");
+        FLintake = hw.get(CRServo.class,  "FLintake");
+        BRintake = hw.get(CRServo.class,  "BRintake");
+        BLintake = hw.get(CRServo.class,  "BLintake");
+
+        BLintake.setDirection(DcMotorSimple.Direction.REVERSE);
+        FRintake.setDirection(DcMotorSimple.Direction.REVERSE);
 
 
-        intake = hw.get(DcMotorEx.class, "intake");
+
 
 
 

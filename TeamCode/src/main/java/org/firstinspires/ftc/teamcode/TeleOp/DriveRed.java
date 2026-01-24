@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
 import static org.firstinspires.ftc.teamcode.HelperMethods.*;
-import static org.firstinspires.ftc.teamcode.subsystems.CameraSensor.*;
 import static java.lang.Math.cos;
+import static java.lang.Math.max;
 import static java.lang.Math.sin;
 
 import android.graphics.Color;
@@ -10,6 +10,7 @@ import android.graphics.Color;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import android.util.Size;
 
@@ -120,7 +121,7 @@ public class DriveRed extends OpMode {
 	double cH;
 
 	int numDetections = 0;
-	int autoFlywheelVelo = 700;
+	double autoFlywheelVelo = 700;
 
 	CameraSensor camera;
 
@@ -128,10 +129,39 @@ public class DriveRed extends OpMode {
 
 	private ColorBlobLocatorProcessor colorLocatorGreen = null;
 
+	double turntablePos = 0.5;
+
 	private AprilTagProcessor aprilTag;
 	static ArrayList<VisionProcessor> processors = new ArrayList<>();
 
 	double prevRange = 0;
+
+	private ElapsedTime rampTime = new ElapsedTime();
+
+	boolean isRamping = false;
+
+	double flyWheelVelo = 0;
+
+	double maxFlyWheelVelo = 1400;
+
+	private final double targetRampTime = 5;
+
+	double s2high = 0.95;
+	double s2low = 0.63;
+
+	double s1high = 0.63;
+	double s1low = 0.31;
+
+	private ElapsedTime sort1Time = new ElapsedTime();
+	private ElapsedTime sort2Time = new ElapsedTime();
+
+	boolean servoAPressed = false;
+
+	boolean servoBPressed = false;
+	boolean prevLeftBumper = false;
+	boolean prevRightBumper = false;
+	private boolean rightVelo;
+
 
 	//this is the red teleop code
 	// it can detect balls by color,
@@ -147,6 +177,9 @@ public class DriveRed extends OpMode {
 		robot.init(hardwareMap);
 
 		robot.initGyro();
+
+		sort1Time.reset();
+		sort2Time.reset();
 
 		//visionPortal = camera.initVision();
 		aprilTag = new AprilTagProcessor.Builder()
@@ -298,11 +331,13 @@ public class DriveRed extends OpMode {
 
 				telemetry.addData("Pose X", det.ftcPose.x);
 				telemetry.addData("Pose Y", det.ftcPose.y);
+
+ */
 				telemetry.addData("Heading (deg)", det.ftcPose.yaw);
 				telemetry.addData("Range", det.ftcPose.range);
 
 
- */
+
 
 				double tagHeadingRad = Math.toRadians(currentTagPos.getHeading(AngleUnit.DEGREES));
 				double relX = det.ftcPose.x;
@@ -394,64 +429,106 @@ public class DriveRed extends OpMode {
 //        } else {
 //            robot.flyWheel.setPower(0);
 //        }
+		double stick = -gamepad2.right_stick_y;
 
-		if (gamepad1.left_bumper) {
-			targetFlyWheelVelo = -1400;//works for the corner peice close
-		} else if (gamepad1.right_bumper) {
-			targetFlyWheelVelo = -1900;
-		} else {
-			targetFlyWheelVelo = 0;
+		if (Math.abs(stick) > 0.08) {
+			turntablePos += stick * 0.004;  // tune this constant
 		}
+
+		robot.turnTableRotator.setPosition(turntablePos);
+		telemetry.addData("turntable pos", turntablePos);
+
+
+		if(gamepad2.x && !isRamping){
+			rampTime.reset();
+			isRamping = true;
+		}
+
+
+
+		if(isRamping){
+			//100 is the degrees per second it accelerates
+			flyWheelVelo = (getVelo(rampTime.seconds()));
+			if(flyWheelVelo > maxFlyWheelVelo){
+				telemetry.addLine("at velo");
+				flyWheelVelo = maxFlyWheelVelo;
+			}
+		}
+
+		if(gamepad2.right_trigger > 0.5){
+			maxFlyWheelVelo += 1;
+		} else if(gamepad2.left_trigger > 0.5){
+			maxFlyWheelVelo -= 1;
+		}
+
+		robot.flyWheel.setVelocity(flyWheelVelo);
+
+//		if (gamepad1.left_bumper) {
+//			targetFlyWheelVelo = -1400;//works for the corner peice close
+//		} else if (gamepad1.right_bumper) {
+//			targetFlyWheelVelo = -1900;
+//		} else {
+//			targetFlyWheelVelo = 0;
+//		}
 
 		//robot.flyWheel.setPower(-0.5);
-		telemetry.addData("velo", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
-		if(gamepad1.right_trigger > 0.5){
-			double range;
-			if(det != null) {
-				 range = det.ftcPose.range;
-			} else {
-				range = prevRange;
-			}
-			if(Math.abs(range - 50) < 10){
-				autoFlywheelVelo = -1400;
-			} else if(Math.abs(range - 80) < 20){
-				autoFlywheelVelo = -1550;
-			}else if (Math.abs(range - 120) < 20){
-				autoFlywheelVelo = -1800;
-			} else {
-				autoFlywheelVelo = -700;
-			}
-
-			robot.flyWheel.setVelocity(autoFlywheelVelo, AngleUnit.DEGREES);
-			robot.flyWheelRotator.setPosition(0.5);
-
-		}else {
-			robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
-			if (gamepad2.b) {
-				//telemetry.addData("b is pressed", "");
-				//more neg is higher
-				//more pos is lower
-				robot.flyWheelRotator.setPosition(0.6);
-			} else if (gamepad2.y) {
-				//telemetry.addData("y is pressed", "");
-				robot.flyWheelRotator.setPosition(farShootingPos);
-			} else if(gamepad2.x){
-			}
+		telemetry.addData("targetVelo", maxFlyWheelVelo);
+		telemetry.addData("velo", robot.flyWheel.getVelocity());
+		telemetry.addData("anglePos", robot.turnTableRotator.getPosition());
 
 
-			if(gamepad2.dpad_up){
-				farShootingPos += 0.01;
-			} else if (gamepad2.dpad_down) {
-				farShootingPos -= 0.01;
-			}
-		}
+//		if(gamepad1.right_trigger > 0.5){
+//			double range;
+//			if(det != null) {
+//				 range = det.ftcPose.range;
+//			} else {
+//				range = prevRange;
+//			}
+//			if(Math.abs(range - 50) < 10){
+//				autoFlywheelVelo = -1400;
+//			} else if(Math.abs(range - 80) < 20){
+//				autoFlywheelVelo = -1550;
+//			}else if (Math.abs(range - 120) < 20){
+//				autoFlywheelVelo = -1800;
+//			} else {
+//				autoFlywheelVelo = -700;
+//			}
+//
+//			robot.flyWheel.setVelocity(autoFlywheelVelo, AngleUnit.DEGREES);
+//			robot.flyWheelRotator.setPosition(0.5);
+//
+//		}else {
+//			robot.flyWheel.setVelocity(targetFlyWheelVelo, AngleUnit.DEGREES);
+//			if (gamepad2.b) {
+//				//telemetry.addData("b is pressed", "");
+//				//more neg is higher
+//				//more pos is lower
+//				robot.flyWheelRotator.setPosition(0.6);
+//			} else if (gamepad2.y) {
+//				//telemetry.addData("y is pressed", "");
+//				robot.flyWheelRotator.setPosition(farShootingPos);
+//			} else if(gamepad2.x){
+//			}
+//
+//
+//			if(gamepad2.dpad_up){
+//				farShootingPos += 0.01;
+//			} else if (gamepad2.dpad_down) {
+//				farShootingPos -= 0.01;
+//			}
+//		}
+
+
+
+
+
 		//telemetry.addData("FlyWheelVelocity: ", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
 		//telemetry.addData("TargetFlywheelVelocity: ", targetFlyWheelVelo);
 		//this checks if the difference is less than 1.5 spins per second
-		if (Math.abs(robot.flyWheel.getVelocity(AngleUnit.DEGREES) - targetFlyWheelVelo) < 25) {
-			// telemetry.addLine("RIGHT VELO");
+		if (Math.abs(robot.flyWheel.getVelocity() - maxFlyWheelVelo) < 25) {
+			rightVelo = true;
 		} else {
-			// telemetry.addLine("WRONG VELO");
+			rightVelo = false;
 		}
 
 
@@ -463,7 +540,8 @@ public class DriveRed extends OpMode {
 
 
 		telemetry.addData("flyWheelPos1:", robot.flyWheelRotator.getPosition());
-		 telemetry.addData("varPos:", farShootingPos);
+		 //telemetry.addData("varPos:", farShootingPos);
+
 
 		telemetry.addData("cError", cError);
 		telemetry.addData("cX", cX);
@@ -471,32 +549,110 @@ public class DriveRed extends OpMode {
 		telemetry.addData("cH", cH);
 
 
-		if (gamepad2.right_trigger > 0.5) {
-			robot.intake.setPower(0.95);
-			//uh I think this works 🥀
-		} else if (gamepad2.left_trigger > 0.5) {
-			robot.intake.setPower(-0.95);
-		} else {
-			robot.intake.setPower(0);
-		}
+//		if (gamepad2.right_trigger > 0.5) {
+//			robot.intake.setPower(0.95);
+//			//uh I think this works 🥀
+//		} else if (gamepad2.left_trigger > 0.5) {
+//			robot.intake.setPower(-0.95);
+//		} else {
+//			robot.intake.setPower(0);
+//		}
 
 		//added methods to find the positions that work, once these are used then you can do set position ones
 		// eventually, have two positions that are trapping a ball on the right and the left
 		//can just toggle between these two positions
 
-		if (gamepad2.dpad_right) {
-			robot.sorter1.setPosition(0.1);
-			//  telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
+		boolean leftBumper = gamepad2.left_bumper;
+		boolean rightBumper = gamepad2.right_bumper;
+
+		if (rightBumper && !prevRightBumper && !servoAPressed && rightVelo) {
+			servoAPressed = true;
+			sort1Time.reset();
 		}
 
-		if (gamepad2.dpad_left) {
-			robot.sorter1.setPosition(0.6);
-			// telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
+		if (leftBumper && !prevLeftBumper && !servoBPressed && rightVelo) {
+			servoBPressed = true;
+			sort2Time.reset();
 		}
+
+		prevRightBumper = rightBumper;
+		prevLeftBumper = leftBumper;
+
+
+		if(servoAPressed){
+			if(sort1Time.seconds() < 0.7){
+				robot.sorter1.setPosition(s1high);
+			} else {
+				servoAPressed = false;
+			}
+		} else {
+			robot.sorter1.setPosition(s1low);
+		}
+
+		if (servoBPressed) {
+			if (sort2Time.seconds() < 0.7) {
+				robot.sorter2.setPosition(s2low);
+			} else {
+				servoBPressed = false;
+			}
+		} else {
+			robot.sorter2.setPosition(s2high);
+		}
+
+
+
+		if(gamepad2.dpad_up){
+			intake();
+		} else if(gamepad2.dpad_down){
+			outake();
+		} else {
+			stopIntake();
+		}
+
+
+//		if(gamepad2.dpad_left){
+//			robot.sorter2.setPosition(s2low);
+//		} else if (gamepad2.dpad_right){
+//			robot.sorter2.setPosition(s2high);
+//		}
+
+
+
+
+
+
+//		if (gamepad2.dpad_right) {
+//			robot.sorter1.setPosition(0.1);
+//			//  telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
+//		}
+//
+//		if (gamepad2.dpad_left) {
+//			robot.sorter1.setPosition(0.6);
+//			// telemetry.addData("sorterServoPos", robot.sorterServo.getPosition());
+//		}
+
 
 		telemetry.update();
 
 
+	}
+
+	public void intake(){
+		robot.FLintake.setPower(0.5);
+		robot.BLintake.setPower(0.5);
+		robot.BRintake.setPower(0.5);
+	}
+
+	public void outake() {
+		robot.FLintake.setPower(-0.5);
+		robot.BLintake.setPower(-0.5);
+		robot.BRintake.setPower(-0.5);
+	}
+
+	public void stopIntake(){
+		robot.FLintake.setPower(0);
+		robot.BLintake.setPower(0);
+		robot.BRintake.setPower(0);
 	}
 
 	/**
@@ -548,6 +704,19 @@ public class DriveRed extends OpMode {
 	public void startAutoMove(NewPositionOfRobot target) {
 		isMovingToSetPos = true;
 		currentTarget = target;
+	}
+
+	public double getVelo(double seconds){
+		return seconds * (maxFlyWheelVelo / targetRampTime);
+	}
+
+	public double getAutomaticFlywheelVelo(double distance){
+		//y=0.000064734x^{4}-0.0216711x^{3}+2.61783x^{2}-129.19871x+3197.02016
+		return 0.000064734 * Math.pow(distance, 4)
+				- 0.0216711 * Math.pow(distance, 3)
+				+ 2.61783 * Math.pow(distance, 2)
+				- 129.19871 * distance
+				+ 3197.02016;
 	}
 
 	public boolean updateAutoDrive() {

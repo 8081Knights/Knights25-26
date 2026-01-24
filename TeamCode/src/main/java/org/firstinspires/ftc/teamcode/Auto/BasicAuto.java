@@ -319,7 +319,7 @@ public class BasicAuto extends LinearOpMode {
 		robot.flyWheel.setPower(-0.9);
 		while (runtime.seconds() < 2) {
 		}
-		robot.intake.setPower(0.9);
+		//robot.intake.setPower(0.9);
 	}
 }
 
