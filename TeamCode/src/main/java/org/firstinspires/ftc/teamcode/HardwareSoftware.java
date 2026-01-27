@@ -43,6 +43,10 @@ public class HardwareSoftware {
 
     public SparkFunOTOS gyro;
 
+    public Servo flyWheelLight = null;
+
+
+
 
 
 
@@ -76,6 +80,7 @@ public class HardwareSoftware {
 
 
 
+        flyWheelLight = hw.get(Servo.class, "flyWheelLight");
 
 
 
