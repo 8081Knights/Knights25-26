@@ -758,27 +758,16 @@ public class DriveRed extends OpMode {
 		double rotY = rotCords[1];
 
 		double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-		robot.FLdrive.setPower(((rotY + rotX + rx) / denominator));
-		robot.BLdrive.setPower(((rotY - rotX + rx) / denominator));
-		robot.FRdrive.setPower(((rotY - rotX - rx) / denominator));
-		robot.BRdrive.setPower(((rotY + rotX - rx) / denominator));
+		robot.FLdrive.setPower(((rotY + rx + rotX) / denominator));
+		robot.FRdrive.setPower(((rotY - rx - rotX) / denominator));
+		robot.BLdrive.setPower(((rotY + rx - rotX) / denominator));
+		robot.BRdrive.setPower(((rotY - rx + rotX) / denominator));
 	}
 
 	public void manualMechanumDrive() {
 		double y = -gamepad1.left_stick_y;
 		double x = gamepad1.left_stick_x;
 		double rx = -gamepad1.right_stick_x;
-
-		//current thing
-//        robot.FLdrive.setPower(y - rx - x);
-//        robot.FRdrive.setPower(y + rx + x);
-//        robot.BLdrive.setPower(y - rx + x);
-//        robot.BRdrive.setPower(y + rx - x);
-
-//        robot.FLdrive.setPower(y + x + rx);
-//        robot.BLdrive.setPower(y - x + rx);
-//        robot.FRdrive.setPower(y - x - rx);
-//        robot.BRdrive.setPower(y + x - rx);
 
 		//headless
 		robot.FLdrive.setPower(y + rx + x);
