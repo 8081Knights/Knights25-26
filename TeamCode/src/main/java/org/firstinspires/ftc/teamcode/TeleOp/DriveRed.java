@@ -10,7 +10,9 @@ import android.graphics.Color;
 import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import android.util.Size;
 
@@ -22,6 +24,7 @@ import org.firstinspires.ftc.teamcode.HardwareSoftware;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.VisionProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.opencv.Circle;
 import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
@@ -87,6 +90,8 @@ public class DriveRed extends OpMode {
 
 	int redTagId = 24;
 	int blueTagId = 20;
+
+	double hoodPosition = 0.5;
 
 	// assuming field size roughly 144 x 144 inches (FTC field)
 	Pose2D redTagPos = new Pose2D(DistanceUnit.INCH, 132, 120, AngleUnit.DEGREES, 225);
@@ -161,6 +166,19 @@ public class DriveRed extends OpMode {
 	boolean prevLeftBumper = false;
 	boolean prevRightBumper = false;
 	private boolean rightVelo;
+
+
+	double green = .5;
+	double purple = .666;
+	double red = .279;
+
+	AprilTagPoseFtc poseFtc = null;
+
+	int MAXFLYWHEEL = 1400;
+
+	boolean isManualFlywheel = false;
+
+
 
 
 	//this is the red teleop code
@@ -286,7 +304,7 @@ public class DriveRed extends OpMode {
 
 		//can change to mechanum by changing line 247
 		if (!isMovingToSetPos) {
-			manualHeadlessDrive();
+			manualMechanumDrive();
 		} else {
 			updateAutoDrive();
 		}
@@ -314,8 +332,11 @@ public class DriveRed extends OpMode {
 			det = detections.get(0);
 		}
 		if(det != null) {
-			prevRange = det.ftcPose.range;
-			telemetry.addData("range", det.ftcPose.range);
+			poseFtc = det.ftcPose;
+		}
+		if(poseFtc != null) {
+			prevRange = poseFtc.range;
+			telemetry.addData("range", poseFtc.range);
 		}
 
 		if (det != null) {
@@ -325,6 +346,19 @@ public class DriveRed extends OpMode {
 				} else {
 					currentTagPos = blueTagPos;
 				}
+
+//				if (gamepad1.dpad_up) {
+//
+//					double kP = 0.006; // tune
+//
+//					double turnPower = kP * det.ftcPose.bearing;
+//					turnPower = Range.clip(turnPower, -0.3, 0.3);
+//					if(gamepad1.a){
+//						robot.turnTableRotator.setPower(turnPower);
+//					} else {
+//						turntable.setPower(0);
+//					}
+//				}
 /*
 				telemetry.addData("ID", det.id);
 				telemetry.addData("Center", "(%.2f, %.2f)", det.center.x, det.center.y);
@@ -333,8 +367,8 @@ public class DriveRed extends OpMode {
 				telemetry.addData("Pose Y", det.ftcPose.y);
 
  */
-				telemetry.addData("Heading (deg)", det.ftcPose.yaw);
-				telemetry.addData("Range", det.ftcPose.range);
+				telemetry.addData("Heading (deg)", poseFtc.yaw);
+				telemetry.addData("Range", poseFtc.range);
 
 
 
@@ -439,27 +473,67 @@ public class DriveRed extends OpMode {
 		telemetry.addData("turntable pos", turntablePos);
 
 
-		if(gamepad2.x && !isRamping){
+			if(gamepad2.x && !isRamping){
 			rampTime.reset();
 			isRamping = true;
-		}
+			}
 
 
 
 		if(isRamping){
 			//100 is the degrees per second it accelerates
 			flyWheelVelo = (getVelo(rampTime.seconds()));
+			if(det != null) {
+					maxFlyWheelVelo = getAutomaticFlywheelVelo(poseFtc.range);
+					flyWheelVelo = maxFlyWheelVelo;
+				telemetry.addData("maxFlywheelVelo", maxFlyWheelVelo);
+			}
 			if(flyWheelVelo > maxFlyWheelVelo){
-				telemetry.addLine("at velo");
 				flyWheelVelo = maxFlyWheelVelo;
+				telemetry.addLine("at velo");
 			}
 		}
 
-		if(gamepad2.right_trigger > 0.5){
+//			if(isRamping) {
+//				flyWheelVelo = (getVelo(rampTime.seconds()));
+//			} else if(flyWheelVelo != 1100 && flyWheelVelo != 1200 && flyWheelVelo != 1300){
+//				flyWheelVelo = 1000;
+//			}
+
+
+
+//			if(gamepad2.b){
+//				flyWheelVelo = 1200;
+//			} else if (gamepad2.y){
+//				flyWheelVelo = 1100;
+//			} else if (gamepad2.a){
+//				flyWheelVelo = 1300;
+//			}
+
+		if(flyWheelVelo > maxFlyWheelVelo){
+			flyWheelVelo = maxFlyWheelVelo;
+		}
+
+		if (gamepad2.dpad_up) {
 			maxFlyWheelVelo += 1;
-		} else if(gamepad2.left_trigger > 0.5){
+		} else if (gamepad2.dpad_down) {
 			maxFlyWheelVelo -= 1;
 		}
+
+
+
+		//}
+
+
+
+
+//
+//	if(gamepad1.dpad_left){
+//		isManualFlywheel = false;
+//	}
+//	if(gamepad1.dpad_right){
+//		isManualFlywheel = true;
+//	}
 
 		robot.flyWheel.setVelocity(flyWheelVelo);
 
@@ -473,7 +547,9 @@ public class DriveRed extends OpMode {
 
 		//robot.flyWheel.setPower(-0.5);
 		telemetry.addData("targetVelo", maxFlyWheelVelo);
-		telemetry.addData("velo", robot.flyWheel.getVelocity());
+
+		telemetry.addData("Actual Velo", robot.flyWheel.getVelocity());
+		telemetry.addData("flywheel velo", flyWheelVelo);
 		telemetry.addData("anglePos", robot.turnTableRotator.getPosition());
 
 
@@ -525,10 +601,13 @@ public class DriveRed extends OpMode {
 		//telemetry.addData("FlyWheelVelocity: ", robot.flyWheel.getVelocity(AngleUnit.DEGREES));
 		//telemetry.addData("TargetFlywheelVelocity: ", targetFlyWheelVelo);
 		//this checks if the difference is less than 1.5 spins per second
-		if (Math.abs(robot.flyWheel.getVelocity() - maxFlyWheelVelo) < 25) {
+		if (Math.abs(robot.flyWheel.getVelocity() - flyWheelVelo) < 40 && robot.flyWheel.getVelocity() > 300) {
+			robot.flyWheelLight.setPosition(green);
 			rightVelo = true;
+			isRamping = false;
 		} else {
 			rightVelo = false;
+			robot.flyWheelLight.setPosition(red);
 		}
 
 
@@ -562,8 +641,8 @@ public class DriveRed extends OpMode {
 		// eventually, have two positions that are trapping a ball on the right and the left
 		//can just toggle between these two positions
 
-		boolean leftBumper = gamepad2.left_bumper;
-		boolean rightBumper = gamepad2.right_bumper;
+		boolean leftBumper = gamepad2.left_trigger > 0.5;
+		boolean rightBumper = gamepad2.right_trigger > 0.5;
 
 		if (rightBumper && !prevRightBumper && !servoAPressed && rightVelo) {
 			servoAPressed = true;
@@ -600,10 +679,18 @@ public class DriveRed extends OpMode {
 		}
 
 
+		if(gamepad2.dpad_right){
+			hoodPosition += 0.01;
+		} else if(gamepad2.dpad_left){
+			hoodPosition -= 0.01;
+		}
 
-		if(gamepad2.dpad_up){
+		robot.flyWheelRotator.setPosition(hoodPosition);
+		telemetry.addData("hood position", hoodPosition);
+
+		if(gamepad1.right_trigger > 0.5){
 			intake();
-		} else if(gamepad2.dpad_down){
+		} else if(gamepad1.left_trigger > 0.5){
 			outake();
 		} else {
 			stopIntake();
@@ -680,7 +767,7 @@ public class DriveRed extends OpMode {
 	public void manualMechanumDrive() {
 		double y = -gamepad1.left_stick_y;
 		double x = gamepad1.left_stick_x;
-		double rx = gamepad1.right_stick_x;
+		double rx = -gamepad1.right_stick_x;
 
 		//current thing
 //        robot.FLdrive.setPower(y - rx - x);
@@ -694,9 +781,9 @@ public class DriveRed extends OpMode {
 //        robot.BRdrive.setPower(y + x - rx);
 
 		//headless
-		robot.FLdrive.setPower(y + rx - x);
+		robot.FLdrive.setPower(y + rx + x);
 		robot.FRdrive.setPower(y - rx - x);
-		robot.BLdrive.setPower(y + rx + x);
+		robot.BLdrive.setPower(y + rx - x);
 		robot.BRdrive.setPower(y - rx + x);
 	}
 
@@ -707,7 +794,14 @@ public class DriveRed extends OpMode {
 	}
 
 	public double getVelo(double seconds){
-		return seconds * (maxFlyWheelVelo / targetRampTime);
+		if(seconds * (maxFlyWheelVelo / targetRampTime) < maxFlyWheelVelo) {
+			return seconds * (maxFlyWheelVelo / targetRampTime);
+		}
+
+		if(maxFlyWheelVelo < MAXFLYWHEEL){
+			return MAXFLYWHEEL;
+		}
+		return maxFlyWheelVelo;
 	}
 
 	public double getAutomaticFlywheelVelo(double distance){
@@ -715,7 +809,7 @@ public class DriveRed extends OpMode {
 		return 0.000064734 * Math.pow(distance, 4)
 				- 0.0216711 * Math.pow(distance, 3)
 				+ 2.61783 * Math.pow(distance, 2)
-				- 129.19871 * distance
+				- 129.19871 * distance // changed this from 129.1
 				+ 3197.02016;
 	}
 
