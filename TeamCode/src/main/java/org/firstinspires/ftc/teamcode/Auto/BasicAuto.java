@@ -92,6 +92,8 @@ public class BasicAuto extends LinearOpMode {
 	static final double DRIVE_SPEED = 0.6;
 	static final double TURN_SPEED = 0.5;
 
+	ElapsedTime servo1Time = new ElapsedTime();
+
 	@Override
 	public void runOpMode() {
 
@@ -321,5 +323,19 @@ public class BasicAuto extends LinearOpMode {
 		}
 		//robot.intake.setPower(0.9);
 	}
+
+
+		public void moveSorterA(){
+
+//			if(servo1Time.seconds() < 0.7){
+//				robot.sorter1.setPosition(s1high);
+//			} else {
+//				servoAPressed = false;
+//			}
+		}
+			//robot.sorter1.setPosition(s1low);
+
 }
+
+
 
