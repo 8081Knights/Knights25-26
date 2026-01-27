@@ -155,7 +155,7 @@ public class RedFacingGoalAuto extends LinearOpMode {
         //-Math.PI / 4.0 - facing north right
 
 
-        new NewPositionOfRobot(48, 0, Math.PI / 2.0);
+       // new NewPositionOfRobot(48, 0, Math.PI / 2.0);
 
 
 
@@ -165,6 +165,7 @@ public class RedFacingGoalAuto extends LinearOpMode {
 //        robotPoses.add(new NewPositionOfRobot(80, 72, -Math.PI / 2.0));
 //        robotPoses.add(new NewPositionOfRobot(110, 72, -Math.PI / 2.0));
 //        robotPoses.add(new NewPositionOfRobot(130, 72, -Math.PI / 2.0));
+        robotPoses.add(new NewPositionOfRobot(0, -20, 0));
 
         //robotPoses.add(new NewPositionOfRobot(20, 0, 0));
         //robotPoses.add(new NewPositionOfRobot(0, 0, 0));
