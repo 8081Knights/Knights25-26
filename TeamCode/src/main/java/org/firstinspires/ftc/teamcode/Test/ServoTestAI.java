@@ -3,12 +3,9 @@ package org.firstinspires.ftc.teamcode.Test;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.teamcode.HardwareSoftware;
 
 import java.util.ArrayList;
 
@@ -51,13 +48,13 @@ public class ServoTestAI extends OpMode {
 
 	final double UP_TIME = 1.00;    // time to flick
 
-	enum FeedState {
+	enum FeedStateAI {
 		IDLE,
 		SERVO_UP,
 		SERVO_DOWN
 	}
 
-	FeedState feedState = FeedState.IDLE;
+	FeedStateAI feedState = FeedStateAI.IDLE;
 	int servoIndex = 0;
 	ElapsedTime timer = new ElapsedTime();
 
@@ -129,9 +126,9 @@ public class ServoTestAI extends OpMode {
 
 
 		if ((gamepad1.a || gamepad1.b || gamepad1.x)) {
-			if (feedState == FeedState.IDLE) {
+			if (feedState == FeedStateAI.IDLE) {
 				servoIndex = 0;
-				feedState = FeedState.SERVO_UP;
+				feedState = FeedStateAI.SERVO_UP;
 				timer.reset();
 			}
 
@@ -148,9 +145,9 @@ public class ServoTestAI extends OpMode {
 
 		}
 
-		if (gamepad1.dpad_down && feedState == FeedState.IDLE) {
+		if (gamepad1.dpad_down && feedState == FeedStateAI.IDLE) {
 			servoIndex = 0;
-			feedState = FeedState.SERVO_UP;
+			feedState = FeedStateAI.SERVO_UP;
 			timer.reset();
 		}
 
@@ -159,7 +156,7 @@ public class ServoTestAI extends OpMode {
 			case SERVO_UP:
 				activeServos.get(servoIndex).setPosition(UP_POS);
 				if (timer.seconds() > UP_TIME) {
-					feedState = FeedState.SERVO_DOWN;
+					feedState = FeedStateAI.SERVO_DOWN;
 					timer.reset();
 				}
 				break;
@@ -169,10 +166,10 @@ public class ServoTestAI extends OpMode {
 				if (timer.seconds() > 0.12) {
 					servoIndex++;
 					if (servoIndex >= activeServos.size()) {
-						feedState = FeedState.IDLE;
+						feedState = FeedStateAI.IDLE;
 						activeServos.clear();
 					} else {
-						feedState = FeedState.SERVO_UP;
+						feedState = FeedStateAI.SERVO_UP;
 					}
 					timer.reset();
 				}

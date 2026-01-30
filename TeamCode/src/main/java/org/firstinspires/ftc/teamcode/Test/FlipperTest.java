@@ -7,13 +7,12 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Disabled
 @TeleOp(name = "dual servo test")
 public class FlipperTest extends OpMode {
 	Servo servo1 = null;
 	Servo servo2 = null;
 
-	DcMotorEx flywheel = null;
+	//DcMotorEx flywheel = null;
 
 	double s2high = 0.95;
 	double s2low = 0.63;
@@ -37,7 +36,7 @@ public class FlipperTest extends OpMode {
 	public void init() {
 		servo1 = hardwareMap.get(Servo.class, "sorter1");
 		servo2 = hardwareMap.get(Servo.class, "sorter2");
-		flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
+		//flywheel = hardwareMap.get(DcMotorEx.class, "flywheel");
 
 		sort1Time.reset();
 		sort2Time.reset();
@@ -77,13 +76,13 @@ public class FlipperTest extends OpMode {
 			}
 		}
 
-		flywheel.setVelocity(-flyWheelVelo);
+		//flywheel.setVelocity(-flyWheelVelo);
 
 		if (isRamping) {
 			telemetry.addData("rampTime", rampTime.seconds());
 		}
 
-		telemetry.addData("flywheel velo", flywheel.getVelocity());
+		//telemetry.addData("flywheel velo", flywheel.getVelocity());
 
 		telemetry.addData("servo2Pos", servo2.getPosition());
 		telemetry.addData("servo1Pos", servo1.getPosition());
