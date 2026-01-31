@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.subsystems.BallState;
 import org.firstinspires.ftc.teamcode.subsystems.Sorter;
 
 import java.util.ArrayList;
@@ -93,22 +94,22 @@ public class HardwareSoftware {
 
 		flyWheelLight = hw.get(Servo.class, "flyWheelLight");
 
-
+		//sorterTJ = new Sorter(hw, "sorterA", BallState.EMPTY, 0.7, 0.5, "ColorSensor1", "ColorSensor2");
 		gyro = hw.get(SparkFunOTOS.class, "gyro");
 
 
-		colorSensor1 = hw.get(RevColorSensorV3.class, "ColorSensor1");
+		colorSensor1 = hw.get(RevColorSensorV3.class, "ColorSensorA1");
 		colorSensor1.setGain(2);
-		colorSensor2 = hw.get(RevColorSensorV3.class, "ColorSensor2");
+		colorSensor2 = hw.get(RevColorSensorV3.class, "ColorSensorA2");
 		colorSensor2.setGain(2);
-		colorSensor3 = hw.get(RevColorSensorV3.class, "ColorSensor3");
+		colorSensor3 = hw.get(RevColorSensorV3.class, "ColorSensorB1");
 		colorSensor3.setGain(2);
-		colorSensor4 = hw.get(RevColorSensorV3.class, "ColorSensor4");
+		colorSensor4 = hw.get(RevColorSensorV3.class, "ColorSensorB2");
 		colorSensor4.setGain(2);
-		colorSensor5 = hw.get(RevColorSensorV3.class, "ColorSensor5");
-		colorSensor5.setGain(2);
-		colorSensor6 = hw.get(RevColorSensorV3.class, "ColorSensor6");
-		colorSensor6.setGain(2);
+//		colorSensor5 = hw.get(RevColorSensorV3.class, "ColorSensor5");
+//		colorSensor5.setGain(2);
+//		colorSensor6 = hw.get(RevColorSensorV3.class, "ColorSensor6");
+//		colorSensor6.setGain(2);
 
 
 		FLdrive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);

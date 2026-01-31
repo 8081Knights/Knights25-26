@@ -1,18 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 public class Sorter {
-
-	public enum FeedState {
-		SERVO_UP,
-		SERVO_DOWN
-	}
-
 
 	BallState ballState;
 	FeedState servoState;
@@ -21,9 +15,12 @@ public class Sorter {
 	double highPos;
 	double lowPos;
 
-	Servo servo;
+	public Servo servo;
 	RevColorSensorV3 sensor1;
 	RevColorSensorV3 sensor2;
+
+
+	public static final double servoUpTime = 0.5;
 
 
 	/**
@@ -43,6 +40,7 @@ public class Sorter {
 		sensor2 = hw.get(RevColorSensorV3.class, sensor2Name);
 		servo = hw.get(Servo.class, servoName);
 		servoTimer.reset();
+		servo.setPosition(lowPos);
 	}
 
 	public BallState getBallState() {
@@ -54,14 +52,20 @@ public class Sorter {
 	}
 
 	public void feedBall() {
-		servo.setPosition(highPos);
+		servoState = FeedState.SERVO_UP;
+		servoTimer.reset();
 	}
 
+	public double getServoTime(){
+		return servoTimer.seconds();
+	}
+
+
 	public void moveServo() {
-		if (servoState == FeedState.SERVO_UP && Math.abs(servo.getPosition() - highPos) > 0.01) {
+		if (servoState == FeedState.SERVO_UP && servoTimer.seconds() > 0.5) {
 			servo.setPosition(highPos);
 		}
-		if (servoState == FeedState.SERVO_DOWN && Math.abs(servo.getPosition()) - lowPos > 0.01) {
+		if (servoState == FeedState.SERVO_DOWN || servoTimer.seconds() > servoUpTime) {
 			servo.setPosition(lowPos);
 		}
 	}
