@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
 public class Sorter {
 
 	BallState ballState;
@@ -56,10 +57,20 @@ public class Sorter {
 		servoTimer.reset();
 	}
 
-	public double getServoTime(){
+	public double getServoTime() {
 		return servoTimer.seconds();
 	}
 
+	public void servoUp() {
+		servo.setPosition(highPos);
+		servoState = FeedState.SERVO_UP;
+		servoTimer.reset();
+	}
+
+	public void servoDown() {
+		servo.setPosition(lowPos);
+		servoState = FeedState.SERVO_DOWN;
+	}
 
 	public void moveServo() {
 		if (servoState == FeedState.SERVO_UP && servoTimer.seconds() > 0.5) {
